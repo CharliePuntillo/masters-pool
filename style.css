@@ -505,63 +505,84 @@ input:focus, select:focus {
 .tourney-status .btn-primary { background: var(--gold); color: var(--black); }
 
 /* ---- Pool Leaderboard ---- */
-.pool-leaderboard table {
+/* Pool member block */
+.pool-member-block {
+    background: var(--white);
+    border-radius: var(--radius);
+    margin-bottom: 1rem;
+    border: 1px solid var(--gray-100);
+    overflow: hidden;
+}
+.pool-member-block.leader {
+    border: 2px solid var(--gold);
+    box-shadow: 0 0 12px var(--gold-glow);
+}
+
+.pool-member-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--green-dark);
+    color: var(--white);
+}
+
+.pool-rank {
+    font-weight: 700;
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    min-width: 28px;
+    text-align: center;
+}
+.pool-rank.first { color: var(--gold); font-size: 1.3rem; }
+
+.pool-member-name { font-weight: 700; font-size: 1rem; flex: 1; }
+
+.pool-member-totals {
+    display: flex;
+    gap: 1rem;
+    align-items: baseline;
+}
+.pool-total { font-weight: 600; font-size: 0.85rem; opacity: 0.8; }
+.pool-topar { font-weight: 700; font-family: var(--font-display); font-size: 1.15rem; }
+.pool-topar.leader { color: var(--gold); }
+
+/* Player table within each member block */
+.pool-player-table {
     width: 100%;
     border-collapse: collapse;
 }
-.pool-leaderboard th {
-    background: var(--green-dark);
-    color: var(--white);
-    padding: 0.6rem 0.8rem;
-    text-align: left;
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-.pool-leaderboard th:first-child { width: 40px; text-align: center; }
-
-.pool-leaderboard td {
-    padding: 0.6rem 0.8rem;
-    border-bottom: 1px solid var(--gray-100);
-    font-size: 0.85rem;
-}
-.pool-leaderboard tr:hover td { background: var(--green-pale); }
-
-.pool-rank { text-align: center; font-weight: 700; color: var(--green-dark); font-family: var(--font-display); }
-.pool-rank.first { color: var(--gold); font-size: 1.1rem; }
-
-.pool-member-name { font-weight: 600; }
-.pool-score { font-weight: 700; font-family: var(--font-display); font-size: 1rem; }
-.pool-score.leader { color: var(--green-dark); }
-
-.pool-players-detail {
-    display: none;
-    padding: 0.5rem 0.8rem 0.8rem 3rem;
+.pool-player-table thead th {
     background: var(--cream);
+    color: var(--green-dark);
+    padding: 0.45rem 0.6rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-align: center;
+    border-bottom: 1px solid var(--gray-100);
 }
-.pool-players-detail.open { display: table-row; }
+.pool-player-table thead th:first-child { text-align: left; padding-left: 1rem; }
 
-.pool-row { cursor: pointer; }
-.pool-row td:first-child::before { content: ''; }
-.pool-expand { font-size: 0.7rem; margin-left: 0.5rem; color: var(--gray-500); transition: var(--transition); }
+.pool-player-table td {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.82rem;
+    text-align: center;
+    border-bottom: 1px solid var(--gray-100);
+}
+.pool-player-table tbody tr:last-child td { border-bottom: none; }
+.pool-player-table tbody tr:hover td { background: var(--green-pale); }
 
-.player-detail-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 0.5rem;
-}
-.player-detail-item {
-    background: var(--white);
-    padding: 0.5rem 0.75rem;
-    border-radius: var(--radius-sm);
-    border-left: 3px solid var(--green-dark);
-    font-size: 0.8rem;
-}
-.player-detail-item .pdname { font-weight: 600; }
-.player-detail-item .pdscore { float: right; font-weight: 700; color: var(--green-dark); }
-.player-detail-item .pdstatus { font-size: 0.72rem; color: var(--gray-500); }
-.player-detail-item.mc { border-left-color: var(--red); }
-.player-detail-item.mc .pdscore { color: var(--red); }
-.player-detail-item.wd { border-left-color: var(--azalea); }
+.pp-name { text-align: left !important; padding-left: 1rem !important; font-weight: 600; }
+.pp-status { font-size: 0.68rem; font-weight: 700; padding: 0.1rem 0.35rem; border-radius: 3px; margin-left: 0.3rem; }
+.pool-player-row.mc .pp-status { background: var(--red-light); color: var(--red); }
+.pool-player-row.wd .pp-status { background: #fce4ec; color: var(--azalea); }
+
+.pp-round { color: var(--gray-700); font-family: var(--font-display); }
+.pp-total { font-weight: 700; font-family: var(--font-display); }
+.pp-topar { font-weight: 700; font-family: var(--font-display); color: var(--green-dark); }
+.pp-topar.mc, .pp-topar.wd { color: var(--red); }
 
 /* ---- Rules ---- */
 .rules-card .card-body { max-width: 700px; margin: 0 auto; }
@@ -703,4 +724,8 @@ input:focus, select:focus {
     .player-pool-header, .player-row { grid-template-columns: 32px 1fr 65px 60px; font-size: 0.78rem; }
     .search-input { width: 130px !important; }
     .tourney-status { flex-direction: column; text-align: center; }
+    .pool-player-table { font-size: 0.75rem; }
+    .pool-player-table td, .pool-player-table thead th { padding: 0.35rem 0.3rem; }
+    .pp-name { padding-left: 0.5rem !important; }
+    .pool-member-header { padding: 0.6rem 0.75rem; }
 }

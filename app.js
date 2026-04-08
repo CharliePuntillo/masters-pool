@@ -565,18 +565,29 @@ async function fetchOdds() {
     }
 }
 
+// Strip diacritics and normalize for comparison
+function normalize(s) {
+    return s.toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/ø/g, "o").replace(/æ/g, "ae").replace(/ð/g, "d");
+}
+
 function getOddsForPlayer(playerName) {
-    // Check cached odds
-    if (state.oddsCache?.data) {
-        // Try exact match first, then fuzzy
-        if (state.oddsCache.data[playerName]) return state.oddsCache.data[playerName];
-        // Try last name match
-        const lastName = playerName.split(" ").pop().toLowerCase();
-        for (const [key, val] of Object.entries(state.oddsCache.data)) {
-            if (key.toLowerCase().includes(lastName) && key.toLowerCase().includes(playerName.split(" ")[0].toLowerCase())) {
-                return val;
-            }
-        }
+    if (!state.oddsCache?.data) return "—";
+
+    // Exact match
+    if (state.oddsCache.data[playerName]) return state.oddsCache.data[playerName];
+
+    const norm = normalize(playerName);
+    const firstName = norm.split(" ")[0];
+    const lastName = norm.split(" ").pop();
+
+    for (const [key, val] of Object.entries(state.oddsCache.data)) {
+        const nk = normalize(key);
+        // Exact normalized match
+        if (nk === norm) return val;
+        // Last name + first name substring match (handles Matt/Matthew, Alex/Alexander)
+        if (nk.includes(lastName) && nk.includes(firstName)) return val;
     }
     return "—";
 }
@@ -680,13 +691,15 @@ function getPlayerScore(playerName) {
     }
 
     if (!scoreSource && state.liveScores?.scores) {
-        // Find by exact name or fuzzy match
+        // Find by exact name or fuzzy match (with diacritics normalization)
         scoreSource = state.liveScores.scores[playerName];
         if (!scoreSource) {
-            const lastName = playerName.split(" ").pop().toLowerCase();
-            const firstName = playerName.split(" ")[0].toLowerCase();
+            const norm = normalize(playerName);
+            const firstName = norm.split(" ")[0];
+            const lastName = norm.split(" ").pop();
             for (const [key, val] of Object.entries(state.liveScores.scores)) {
-                if (key.toLowerCase().includes(lastName) && key.toLowerCase().includes(firstName)) {
+                const nk = normalize(key);
+                if (nk === norm || (nk.includes(lastName) && nk.includes(firstName))) {
                     scoreSource = val;
                     break;
                 }
@@ -796,56 +809,55 @@ function renderLeaderboard() {
 
     const standings = calculatePoolStandings();
 
-    let html = `<table>
-        <thead><tr>
-            <th>#</th>
-            <th>Member</th>
-            <th>Total</th>
-            <th>To Par</th>
-            <th>Players</th>
-        </tr></thead><tbody>`;
+    let html = "";
 
     standings.forEach((s, i) => {
         const rank = i + 1;
-        const rankClass = rank === 1 && s.totalScore !== null ? " first" : "";
+        const isLeader = rank === 1 && s.totalScore !== null;
 
-        html += `<tr class="pool-row" onclick="toggleDetail(${i})">
-            <td class="pool-rank${rankClass}">${s.totalScore !== null ? rank : "—"}</td>
-            <td class="pool-member-name">${escapeHtml(s.member.name)} <span class="pool-expand" id="expand-${i}">&#9660;</span></td>
-            <td class="pool-score${rank === 1 && s.totalScore !== null ? ' leader' : ''}">${s.totalScore ?? "—"}</td>
-            <td class="pool-score${rank === 1 && s.totalScore !== null ? ' leader' : ''}">${s.toParStr}</td>
-            <td style="font-size:0.78rem;color:var(--gray-500);">${s.players.map(p => p.name.split(" ").pop()).join(", ")}</td>
-        </tr>`;
-
-        html += `<tr class="pool-players-detail" id="detail-${i}"><td colspan="5">
-            <div class="player-detail-grid">
-                ${s.players.map(p => {
-                    const statusClass = p.status === "MC" ? " mc" : (p.status === "WD" ? " wd" : "");
-                    return `<div class="player-detail-item${statusClass}">
-                        <span class="pdname">${escapeHtml(p.name)}</span>
-                        <span class="pdscore">${p.toParStr || "—"}</span>
-                        <div class="pdstatus">${p.rounds.map(r => r ?? "—").join(" - ")}${p.status ? ` (${p.status})` : ""}</div>
-                    </div>`;
-                }).join("")}
+        html += `<div class="pool-member-block${isLeader ? ' leader' : ''}">
+            <div class="pool-member-header">
+                <span class="pool-rank${isLeader ? ' first' : ''}">${s.totalScore !== null ? rank : "—"}</span>
+                <span class="pool-member-name">${escapeHtml(s.member.name)}</span>
+                <span class="pool-member-totals">
+                    <span class="pool-total">${s.totalScore ?? "—"}</span>
+                    <span class="pool-topar${isLeader ? ' leader' : ''}">${s.toParStr}</span>
+                </span>
             </div>
-        </td></tr>`;
+            <table class="pool-player-table">
+                <thead><tr>
+                    <th>Player</th>
+                    <th>R1</th>
+                    <th>R2</th>
+                    <th>R3</th>
+                    <th>R4</th>
+                    <th>Tot</th>
+                    <th>Par</th>
+                </tr></thead>
+                <tbody>
+                    ${s.players.map(p => {
+                        const statusClass = p.status === "MC" ? " mc" : (p.status === "WD" ? " wd" : "");
+                        return `<tr class="pool-player-row${statusClass}">
+                            <td class="pp-name">${escapeHtml(p.name)}${p.status ? ` <span class="pp-status">${p.status}</span>` : ""}</td>
+                            <td class="pp-round">${p.rounds[0] ?? "—"}</td>
+                            <td class="pp-round">${p.rounds[1] ?? "—"}</td>
+                            <td class="pp-round">${p.rounds[2] ?? "—"}</td>
+                            <td class="pp-round">${p.rounds[3] ?? "—"}</td>
+                            <td class="pp-total">${p.total ?? "—"}</td>
+                            <td class="pp-topar${statusClass}">${p.toParStr || "—"}</td>
+                        </tr>`;
+                    }).join("")}
+                </tbody>
+            </table>
+        </div>`;
     });
 
-    html += "</tbody></table>";
     container.innerHTML = html;
 
     // Check for WD before R1 replacements
     checkReplacements();
 }
 
-function toggleDetail(index) {
-    const row = document.getElementById(`detail-${index}`);
-    const arrow = document.getElementById(`expand-${index}`);
-    if (row) {
-        row.classList.toggle("open");
-        if (arrow) arrow.innerHTML = row.classList.contains("open") ? "&#9650;" : "&#9660;";
-    }
-}
 
 // ──────────────────────────────────────────────
 // WD BEFORE R1 REPLACEMENTS
@@ -1060,14 +1072,21 @@ function escapeAttr(str) {
 // INITIALIZATION
 // ──────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
-    // Load API key from URL hash fragment if present (hash is never sent to server)
-    // Usage: https://yoursite.github.io/masters-pool/#key=YOUR_API_KEY
+    // Load API key: priority is URL hash > injected meta tag > saved state
+    // 1. URL hash fragment (never sent to server): #key=YOUR_API_KEY
     const hash = window.location.hash;
     if (hash.startsWith("#key=")) {
         state.oddsApiKey = hash.slice(5);
         saveState();
-        // Clear the hash from the URL bar so it's not visible if someone looks over your shoulder
         history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
+    // 2. Injected by GitHub Actions from repository secret
+    if (!state.oddsApiKey) {
+        const meta = document.querySelector('meta[name="odds-api-key"]');
+        if (meta && meta.content && meta.content !== "__ODDS_API_KEY__") {
+            state.oddsApiKey = meta.content;
+            saveState();
+        }
     }
 
     // Nav
