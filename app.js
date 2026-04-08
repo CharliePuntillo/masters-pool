@@ -1416,6 +1416,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     } catch {}
 
+    // Hide loading spinner — state is ready
+    const loadingEl = document.getElementById("appLoading");
+    if (loadingEl) loadingEl.style.display = "none";
+
     // Show appropriate tab based on draft state
     if (state.draftPhase === "complete") showTab("leaderboard");
     else showTab("draft");

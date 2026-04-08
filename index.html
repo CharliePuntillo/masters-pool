@@ -34,9 +34,13 @@
 
         <!-- Main Content -->
         <main class="main">
+            <!-- Loading state while Supabase loads -->
+            <div id="appLoading" class="text-center pad" style="padding:3rem;">
+                <span class="spinner"></span> Loading draft...
+            </div>
 
             <!-- ========== DRAFT TAB ========== -->
-            <section id="tab-draft" class="tab-content active">
+            <section id="tab-draft" class="tab-content">
                 <div class="container">
                     <!-- Setup (shown before draft starts) -->
                     <div id="draftSetup">
