@@ -620,8 +620,7 @@ function renderDraftBoard() {
             if (pick) cellClass += " filled";
 
             if (pick) {
-                const player = MASTERS_FIELD.find(p => p.name === pick.playerName);
-                html += `<td class="${cellClass}"><div class="draft-pick-name">${escapeHtml(pick.playerName)}</div><div class="draft-pick-sub">${player?.country || ""}</div></td>`;
+                html += `<td class="${cellClass}"><div class="draft-pick-name">${escapeHtml(pick.playerName)}</div></td>`;
             } else {
                 html += `<td class="${cellClass}">${isCurrent ? '<span style="color:var(--gold);font-weight:700;">◄</span>' : ""}</td>`;
             }
@@ -653,8 +652,7 @@ function renderFinalBoard() {
             const pick = state.picks.find(p => p.pickIndex === pickIdx);
 
             if (pick) {
-                const player = MASTERS_FIELD.find(p => p.name === pick.playerName);
-                html += `<td class="pick-cell filled"><div class="draft-pick-name">${escapeHtml(pick.playerName)}</div><div class="draft-pick-sub">${player?.country || ""}</div></td>`;
+                html += `<td class="pick-cell filled"><div class="draft-pick-name">${escapeHtml(pick.playerName)}</div></td>`;
             } else {
                 html += `<td class="pick-cell">—</td>`;
             }
@@ -766,10 +764,11 @@ async function fetchLiveScores() {
     infoEl.innerHTML = '<span class="spinner"></span> Fetching live scores...';
 
     try {
-        // Fetch both endpoints in parallel — header has tee times/thru, scoreboard has round scores
-        const [headerResp, scoreResp] = await Promise.all([
+        // Fetch all endpoints in parallel
+        const [headerResp, scoreResp, mastersResp] = await Promise.all([
             fetch("https://site.web.api.espn.com/apis/v2/scoreboard/header?sport=golf&league=pga"),
             fetch("https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard"),
+            fetch("https://www.masters.com/en_US/scores/feeds/2026/scores.json").catch(() => null),
         ]);
 
         // Parse header data (tee times, thru, status)
@@ -796,6 +795,30 @@ async function fetchLiveScores() {
 
             headerLookup[name] = { teeTime, thru };
         });
+
+        // Fuzzy name lookup helper
+        function findFuzzy(obj, name) {
+            const norm = normalize(name);
+            const firstName = norm.split(" ")[0];
+            const lastName = norm.split(" ").pop();
+            for (const [key, val] of Object.entries(obj)) {
+                const nk = normalize(key);
+                if (nk === norm || (nk.includes(lastName) && nk.includes(firstName))) return val;
+            }
+            return null;
+        }
+
+        // Parse masters.com data for tee times (has all 91 players)
+        const mastersLookup = {};
+        if (mastersResp?.ok) {
+            try {
+                const mastersData = await mastersResp.json();
+                (mastersData.data?.player || []).forEach(p => {
+                    const name = p.full_name || `${p.first_name} ${p.last_name}`;
+                    mastersLookup[name] = { teeTime: p.teetime || "" };
+                });
+            } catch (e) { /* ignore parse errors */ }
+        }
 
         // Parse scoreboard data (round scores)
         const scoreData = {};
@@ -834,18 +857,27 @@ async function fetchLiveScores() {
                         else if (playerStatus === "STATUS_WITHDRAWN" || c.status?.type?.description?.toLowerCase().includes("withdraw")) statusFlag = "WD";
 
                         const hl = headerLookup[name] || {};
-                        scoreData[name] = { ...scores, status: statusFlag, teeTime: hl.teeTime || "", thru: hl.thru || "" };
+                        const ml = mastersLookup[name] || findFuzzy(mastersLookup, name) || {};
+                        scoreData[name] = { ...scores, status: statusFlag, teeTime: hl.teeTime || ml.teeTime || "", thru: hl.thru || "" };
                     });
                 }
             }
         }
 
-        // If scoreboard had no competitors but header did, populate from header
-        if (Object.keys(scoreData).length === 0 && headerPlayers.length > 0) {
+        // If scoreboard had no competitors but header did, populate from header + masters
+        if (Object.keys(scoreData).length === 0) {
+            // Use masters.com as primary source for all players
+            for (const [name, ml] of Object.entries(mastersLookup)) {
+                const hl = headerLookup[name] || findFuzzy(headerLookup, name) || {};
+                scoreData[name] = { status: "", teeTime: hl.teeTime || ml.teeTime || "", thru: hl.thru || "" };
+            }
+            // Add any remaining from header not in masters
             headerPlayers.forEach(c => {
                 const name = c.displayName || "";
-                const hl = headerLookup[name] || {};
-                scoreData[name] = { status: "", teeTime: hl.teeTime || "", thru: hl.thru || "" };
+                if (!scoreData[name] && !findFuzzy(scoreData, name)) {
+                    const hl = headerLookup[name] || {};
+                    scoreData[name] = { status: "", teeTime: hl.teeTime || "", thru: hl.thru || "" };
+                }
             });
         }
 

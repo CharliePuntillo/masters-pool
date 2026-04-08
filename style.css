@@ -280,7 +280,6 @@ input:focus, select:focus {
     .setup-grid { grid-template-columns: 1fr; }
     .header-content { justify-content: center; text-align: center; }
     .nav { width: 100%; justify-content: center; padding-bottom: 0.5rem; }
-    .draft-layout { grid-template-columns: 1fr !important; }
 }
 
 /* ---- Member List ---- */
@@ -378,12 +377,6 @@ input:focus, select:focus {
 .pick-name { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; }
 
 /* ---- Draft Layout ---- */
-.draft-layout {
-    display: grid;
-    grid-template-columns: 1fr 1.5fr;
-    gap: 1.5rem;
-    align-items: start;
-}
 
 /* ---- Player Pool ---- */
 .search-input { width: 180px !important; padding: 0.35rem 0.6rem !important; font-size: 0.8rem !important; }
@@ -436,24 +429,24 @@ input:focus, select:focus {
 .draft-board {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.8rem;
-    min-width: 400px;
+    font-size: 0.72rem;
+    min-width: 300px;
 }
 
 .draft-board th {
     background: var(--green-dark);
     color: var(--white);
-    padding: 0.5rem 0.6rem;
+    padding: 0.3rem 0.4rem;
     text-align: left;
     font-weight: 600;
     white-space: nowrap;
     font-family: var(--font-display);
-    font-size: 0.85rem;
+    font-size: 0.75rem;
 }
 .draft-board th.round-header { background: var(--green-mid); text-align: center; }
 
 .draft-board td {
-    padding: 0.4rem 0.6rem;
+    padding: 0.25rem 0.35rem;
     border: 1px solid var(--gray-100);
     vertical-align: middle;
 }
@@ -461,14 +454,12 @@ input:focus, select:focus {
     font-weight: 600;
     background: var(--cream);
     white-space: nowrap;
-    min-width: 100px;
 }
-.draft-board td.pick-cell { text-align: center; min-width: 110px; }
+.draft-board td.pick-cell { text-align: center; min-width: 80px; }
 .draft-board td.pick-cell.current-pick { background: var(--gold-glow); border: 2px solid var(--gold); }
 .draft-board td.pick-cell.filled { background: var(--green-pale); }
 
-.draft-pick-name { font-weight: 600; font-size: 0.78rem; }
-.draft-pick-sub { font-size: 0.68rem; color: var(--gray-500); }
+.draft-pick-name { font-weight: 600; font-size: 0.7rem; white-space: nowrap; }
 
 /* ---- Celebration ---- */
 .celebration {
