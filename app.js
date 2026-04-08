@@ -320,8 +320,9 @@ async function subscribeToRealtimeUpdates() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
             // Re-render current view
             refreshUI();
-            // If draft just completed, fetch scores immediately
-            if (remote.draftPhase === "complete" && !state.liveScores) {
+            // If draft just completed, switch to leaderboard and fetch scores
+            if (remote.draftPhase === "complete") {
+                showTab("leaderboard");
                 fetchLiveScores();
             }
         })
@@ -840,7 +841,7 @@ function normalize(s) {
     return s.toLowerCase()
         .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
         .replace(/ø/g, "o").replace(/æ/g, "ae").replace(/ð/g, "d")
-        .replace(/[-.']/g, "").replace(/\s+/g, " ").trim();
+        .replace(/-/g, " ").replace(/[.']/g, "").replace(/\s+/g, " ").trim();
 }
 
 // Returns { win, winNum, top5, top10 } or null
@@ -881,7 +882,9 @@ async function fetchLiveScores() {
     try {
         // Masters.com via Supabase Edge Function proxy (avoids CORS)
         // ESPN scoreboard is the fallback if proxy is down
-        const mastersResp = await fetch(`${SUPABASE_URL}/functions/v1/scores-proxy`).catch(() => null);
+        const mastersResp = await fetch(`${SUPABASE_URL}/functions/v1/scores-proxy`, {
+            headers: { "Authorization": `Bearer ${SUPABASE_ANON}` }
+        }).catch(() => null);
 
         const scoreData = {};
         const allRoundScores = { 1: [], 2: [], 3: [], 4: [] };
@@ -1217,7 +1220,8 @@ function checkReplacements() {
     }
 
     card.style.display = "";
-    const undrafted = getAvailablePlayers();
+    const usedReplacements = new Set(Object.values(state.replacements));
+    const undrafted = getAvailablePlayers().filter(p => !usedReplacements.has(p.name));
 
     list.innerHTML = wdBeforeR1.map(({ pick, playerName }) => {
         const member = getMemberById(pick.memberId);
