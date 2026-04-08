@@ -1228,10 +1228,9 @@ function makeReplacement(originalPlayerName, replacementName) {
 // MANUAL SCORE ENTRY
 // ──────────────────────────────────────────────
 function initManualScores() {
-    document.getElementById("manualScoresBtn").addEventListener("click", openManualModal);
-    document.getElementById("closeManualModal").addEventListener("click", closeManualModal);
-    document.getElementById("cancelManualBtn").addEventListener("click", closeManualModal);
-    document.getElementById("saveManualBtn").addEventListener("click", saveManualScores);
+    document.getElementById("closeManualModal")?.addEventListener("click", closeManualModal);
+    document.getElementById("cancelManualBtn")?.addEventListener("click", closeManualModal);
+    document.getElementById("saveManualBtn")?.addEventListener("click", saveManualScores);
 }
 
 function openManualModal() {
