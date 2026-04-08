@@ -160,21 +160,18 @@
 
                     <!-- Draft complete -->
                     <div id="draftComplete" style="display:none;">
-                        <div class="celebration">
-                            <h2>Draft Complete!</h2>
-                            <p>The field is set. May the best golfer(s) win!</p>
-                            <button class="btn btn-gold" onclick="showTab('leaderboard')">View Leaderboard</button>
-                        </div>
                         <div class="card draft-board-card">
                             <div class="card-header">
                                 <h2>Final Draft Board</h2>
-                                <button class="btn btn-sm btn-danger" id="resetDraftBtn">Reset Draft</button>
                             </div>
                             <div class="card-body no-pad">
                                 <div class="draft-board-wrapper">
                                     <table class="draft-board" id="finalDraftBoard"></table>
                                 </div>
                             </div>
+                        </div>
+                        <div style="text-align:center; margin-top:2rem; opacity:0.5;">
+                            <button class="btn btn-sm btn-outline" id="resetDraftBtn" style="font-size:0.7rem;">Reset Entire Draft</button>
                         </div>
                     </div>
                 </div>

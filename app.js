@@ -510,9 +510,9 @@ async function makePick(playerName) {
     if (state.currentPickIndex >= totalPicks) {
         state.draftPhase = "complete";
         await saveState();
-        renderDraft();
         launchConfetti();
         fetchLiveScores();
+        setTimeout(() => showTab("leaderboard"), 2500);
     } else {
         await saveState();
         renderDraft();
