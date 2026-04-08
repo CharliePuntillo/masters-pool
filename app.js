@@ -560,7 +560,7 @@ function renderPlayerPool() {
         const top10 = o?.top10 || "—";
         const hasOdds = o?.win;
         return `<div class="player-row" onclick="makePick('${escapeAttr(p.name)}')">
-            <span class="player-name-cell">${escapeHtml(p.name)} <span class="player-country">${p.country}</span></span>
+            <span class="player-name-cell">${escapeHtml(p.name)}</span>
             <span class="player-odds ${hasOdds ? '' : 'no-odds'}">${win}</span>
             <span class="player-odds ${hasOdds ? 'odds-top5' : 'no-odds'}">${top5}</span>
             <span class="player-odds ${hasOdds ? 'odds-top10' : 'no-odds'}">${top10}</span>
@@ -729,24 +729,32 @@ function normalize(s) {
         .replace(/[-.']/g, "").replace(/\s+/g, " ").trim();
 }
 
-// Returns { win, winNum, top5, top20 } or null
+// Returns { win, winNum, top5, top10 } or null
+// Merges hardcoded odds (has top5/top10) with live cache (may have fresher win odds)
 function getOddsForPlayer(playerName) {
-    const src = state.oddsCache?.data || HARDCODED_ODDS;
-    if (!src) return null;
-
-    // Exact match
-    if (src[playerName]) return src[playerName];
-
-    const norm = normalize(playerName);
-    const firstName = norm.split(" ")[0];
-    const lastName = norm.split(" ").pop();
-
-    for (const [key, val] of Object.entries(src)) {
-        const nk = normalize(key);
-        if (nk === norm) return val;
-        if (nk.includes(lastName) && nk.includes(firstName)) return val;
+    function lookup(src, name) {
+        if (!src) return null;
+        if (src[name]) return src[name];
+        const norm = normalize(name);
+        const firstName = norm.split(" ")[0];
+        const lastName = norm.split(" ").pop();
+        for (const [key, val] of Object.entries(src)) {
+            const nk = normalize(key);
+            if (nk === norm || (nk.includes(lastName) && nk.includes(firstName))) return val;
+        }
+        return null;
     }
-    return null;
+
+    const hardcoded = lookup(HARDCODED_ODDS, playerName);
+    const cached = lookup(state.oddsCache?.data, playerName);
+
+    if (!hardcoded && !cached) return null;
+
+    // Merge: hardcoded is the base (has top5/top10), cache overlays win odds
+    return {
+        ...(hardcoded || {}),
+        ...(cached?.win ? { win: cached.win, winNum: cached.winNum } : {}),
+    };
 }
 
 // ──────────────────────────────────────────────
