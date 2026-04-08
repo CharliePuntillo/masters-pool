@@ -421,6 +421,9 @@ input:focus, select:focus {
 .player-name-cell { font-weight: 500; }
 .player-country { font-size: 0.72rem; color: var(--gray-500); margin-left: 0.4rem; }
 .ph-odds { text-align: center; }
+.ph-sort { cursor: pointer; transition: var(--transition); user-select: none; }
+.ph-sort:hover { color: var(--green-dark); }
+.ph-sort.active { color: var(--green-dark); font-weight: 800; }
 .player-odds { font-size: 0.76rem; color: var(--blue); font-weight: 600; text-align: center; }
 .player-odds.odds-top5 { color: var(--green-dark); }
 .player-odds.odds-top10 { color: var(--gray-700); }
@@ -523,17 +526,16 @@ input:focus, select:focus {
 .lb-title {
     font-family: var(--font-display);
     font-weight: 900;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: var(--green-dark);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 .lb-updated {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 600;
     color: var(--gray-500);
     text-transform: uppercase;
-    letter-spacing: 0.3px;
 }
 
 .lb-scroll { overflow-x: auto; }
@@ -541,30 +543,29 @@ input:focus, select:focus {
 .lb-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 700px;
-    font-size: 0.82rem;
+    min-width: 600px;
+    font-size: 0.78rem;
 }
 
 /* Header rows */
 .lb-head-top th {
     background: var(--green-dark);
     color: var(--white);
-    padding: 0.5rem 0.6rem;
+    padding: 0.35rem 0.4rem;
     font-weight: 700;
     text-align: center;
-    font-size: 0.82rem;
+    font-size: 0.78rem;
     border-right: 1px solid rgba(255,255,255,0.15);
 }
-.lb-rank-head, .lb-team-head { text-align: left; }
-.lb-rank-head { width: 50px; text-align: center; }
-.lb-team-head { min-width: 100px; }
-.lb-total-head { width: 70px; }
+.lb-rank-head { width: 30px; text-align: center; }
+.lb-team-head { text-align: left; min-width: 80px; }
+.lb-total-head { width: 52px; }
 
 .lb-head-sub th {
     background: var(--cream);
     color: var(--gray-500);
-    padding: 0.3rem 0.5rem;
-    font-size: 0.68rem;
+    padding: 0.2rem 0.35rem;
+    font-size: 0.62rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.03em;
@@ -572,7 +573,7 @@ input:focus, select:focus {
     border-right: 1px solid var(--gray-100);
 }
 .lb-sub { text-align: left; }
-.lb-sub-score { text-align: center; width: 48px; }
+.lb-sub-score { text-align: center; width: 42px; }
 
 /* Body rows */
 .lb-row { border-bottom: 1px solid var(--gray-100); }
@@ -580,7 +581,7 @@ input:focus, select:focus {
 .lb-row.lb-leader td { background: var(--cream); }
 
 .lb-row td {
-    padding: 0.6rem 0.5rem;
+    padding: 0.35rem 0.35rem;
     vertical-align: middle;
     border-right: 1px solid var(--gray-100);
 }
@@ -590,46 +591,29 @@ input:focus, select:focus {
     text-align: center;
     font-weight: 700;
     font-family: var(--font-display);
-    font-size: 1.1rem;
+    font-size: 0.88rem;
     color: var(--green-dark);
 }
 .lb-leader .lb-rank { color: var(--gold); }
 
 .lb-team {
     white-space: nowrap;
-}
-.lb-team-name {
-    display: block;
     font-weight: 700;
-    font-size: 0.88rem;
-}
-.lb-team-score {
-    display: block;
-    font-size: 0.72rem;
-    color: var(--green-dark);
-    font-weight: 600;
+    font-size: 0.82rem;
 }
 
-.lb-player {
-    min-width: 110px;
-}
+.lb-player { min-width: 90px; }
 .lb-pname {
-    display: block;
     font-weight: 600;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     white-space: nowrap;
 }
-.lb-country {
-    display: block;
-    font-size: 0.68rem;
-    color: var(--gray-500);
-}
 .lb-status {
-    font-size: 0.62rem;
+    font-size: 0.58rem;
     font-weight: 700;
-    padding: 0.05rem 0.3rem;
+    padding: 0.05rem 0.25rem;
     border-radius: 3px;
-    margin-left: 0.2rem;
+    margin-left: 0.15rem;
     background: var(--red-light);
     color: var(--red);
 }
@@ -638,16 +622,31 @@ input:focus, select:focus {
     text-align: center;
     font-weight: 700;
     font-family: var(--font-display);
-    font-size: 0.88rem;
+    font-size: 0.82rem;
     color: var(--green-dark);
+    white-space: nowrap;
 }
 .lb-score.lb-mc { color: var(--red); }
+
+.lb-tee {
+    font-size: 0.72rem;
+    color: var(--gray-500);
+    font-weight: 500;
+    font-family: var(--font-body);
+}
+.lb-thru {
+    display: block;
+    font-size: 0.6rem;
+    color: var(--gray-500);
+    font-weight: 500;
+    font-family: var(--font-body);
+}
 
 .lb-team-total {
     text-align: center;
     font-weight: 900;
     font-family: var(--font-display);
-    font-size: 1.15rem;
+    font-size: 1rem;
     color: var(--green-dark);
     background: var(--cream);
 }

@@ -514,6 +514,13 @@ function renderDraft() {
     }
 }
 
+let playerSortCol = "win"; // "win", "top5", "top10"
+
+function parseOddsNum(str) {
+    if (!str || str === "—") return Infinity;
+    return parseInt(str.replace("+", ""), 10);
+}
+
 function renderPlayerPool() {
     const container = document.getElementById("playerPool");
     const searchInput = document.getElementById("playerSearch");
@@ -526,10 +533,19 @@ function renderPlayerPool() {
         return { ...p, odds };
     });
 
-    // Sort by win odds (best/lowest first), players without odds go to bottom
+    // Sort by selected odds column (best/lowest first)
     withOdds.sort((a, b) => {
-        const aNum = a.odds?.winNum ?? Infinity;
-        const bNum = b.odds?.winNum ?? Infinity;
+        let aNum, bNum;
+        if (playerSortCol === "top5") {
+            aNum = parseOddsNum(a.odds?.top5);
+            bNum = parseOddsNum(b.odds?.top5);
+        } else if (playerSortCol === "top10") {
+            aNum = parseOddsNum(a.odds?.top10);
+            bNum = parseOddsNum(b.odds?.top10);
+        } else {
+            aNum = a.odds?.winNum ?? Infinity;
+            bNum = b.odds?.winNum ?? Infinity;
+        }
         return aNum - bNum;
     });
 
@@ -556,9 +572,21 @@ function renderPlayerPool() {
         container.innerHTML = '<div style="padding:2rem;text-align:center;color:#888;">No players found</div>';
     }
 
-    // Wire up search
+    // Wire up search and sort headers
     if (!searchInput._wired) {
         searchInput.addEventListener("input", () => renderPlayerPool());
+        document.querySelectorAll(".ph-sort").forEach(btn => {
+            btn.addEventListener("click", () => {
+                playerSortCol = btn.dataset.sort;
+                document.querySelectorAll(".ph-sort").forEach(b => {
+                    b.classList.remove("active");
+                    b.textContent = b.textContent.replace(/ ▼$/, "").replace(/ ▲$/, "");
+                });
+                btn.classList.add("active");
+                btn.textContent = btn.textContent + " ▼";
+                renderPlayerPool();
+            });
+        });
         searchInput._wired = true;
     }
 }
@@ -786,7 +814,26 @@ async function fetchLiveScores() {
             if (playerStatus === "STATUS_CUT") statusFlag = "MC";
             else if (playerStatus === "STATUS_WITHDRAWN" || c.status?.type?.description?.toLowerCase().includes("withdraw")) statusFlag = "WD";
 
-            scoreData[name] = { ...scores, status: statusFlag };
+            // Extract tee time if player hasn't started their round
+            let teeTime = "";
+            const teeTimeRaw = c.status?.teeTime || c.status?.startDate;
+            if (teeTimeRaw && (playerStatus === "STATUS_SCHEDULED" || playerStatus === "STATUS_TEE_TIME")) {
+                const d = new Date(teeTimeRaw);
+                if (!isNaN(d)) teeTime = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+            }
+
+            // Thru holes or "F" for finished round
+            let thru = "";
+            const completedHoles = c.status?.period === roundNum ? (c.status?.thru || c.statistics?.find(s => s.name === "holesPlayed")?.displayValue || "") : "";
+            if (playerStatus === "STATUS_FINAL" || (completedHoles && parseInt(completedHoles) >= 18)) {
+                thru = "F";
+            } else if (playerStatus === "STATUS_IN_PROGRESS" && completedHoles) {
+                thru = completedHoles;
+            } else if (c.status?.displayValue) {
+                thru = c.status.displayValue;
+            }
+
+            scoreData[name] = { ...scores, status: statusFlag, teeTime, thru };
         });
 
         // Calculate daily averages
@@ -837,7 +884,7 @@ function getPlayerScore(playerName) {
         dailyAvg = state.liveScores?.dailyAvg || {};
     }
 
-    if (!scoreSource) return { total: null, rounds: [], status: "", detail: "No scores" };
+    if (!scoreSource) return { total: null, rounds: [], status: "", teeTime: "", thru: "", detail: "No scores" };
 
     const rounds = [];
     let total = 0;
@@ -874,6 +921,8 @@ function getPlayerScore(playerName) {
         toParStr: completedRounds.length > 0 ? toParStr : "—",
         rounds,
         status,
+        teeTime: scoreSource.teeTime || "",
+        thru: scoreSource.thru || "",
         detail: completedRounds.length > 0
             ? `${rounds.map(r => r ?? "—").join("-")} (${toParStr})`
             : "No scores"
@@ -939,13 +988,7 @@ function renderLeaderboard() {
     const standings = calculatePoolStandings();
     const numPicks = state.picksPerPerson;
 
-    // Find player country
-    function getCountry(name) {
-        const p = MASTERS_FIELD.find(f => f.name === name);
-        return p ? p.country : "";
-    }
-
-    // Build header: RANK | TEAM | R1 (Player/Score) ... Rn | TEAM TOTAL
+    // Build header: TOTAL | RANK | TEAM | R1 (Player/Score/Thru) ... Rn
     let roundHeaders = "";
     let subHeaders = "";
     for (let r = 1; r <= numPicks; r++) {
@@ -961,17 +1004,17 @@ function renderLeaderboard() {
     }
 
     let html = `<div class="lb-header-bar">
-        <div class="lb-title">Final Draft Leaderboard</div>
+        <div class="lb-title">Draft Leaderboard</div>
         ${updatedStr ? `<div class="lb-updated">Updated: ${updatedStr}</div>` : ""}
     </div>
     <div class="lb-scroll">
     <table class="lb-table">
         <thead>
             <tr class="lb-head-top">
-                <th class="lb-rank-head" rowspan="2">Rank</th>
+                <th class="lb-total-head" rowspan="2">Tot</th>
+                <th class="lb-rank-head" rowspan="2">#</th>
                 <th class="lb-team-head" rowspan="2">Team</th>
                 ${roundHeaders}
-                <th class="lb-total-head" rowspan="2">Team<br>Total</th>
             </tr>
             <tr class="lb-head-sub">${subHeaders}</tr>
         </thead>
@@ -985,20 +1028,28 @@ function renderLeaderboard() {
         for (let r = 0; r < numPicks; r++) {
             const p = s.players[r];
             if (p) {
-                const country = getCountry(p.name);
                 const statusTag = p.status ? ` <span class="lb-status">${p.status}</span>` : "";
-                cells += `<td class="lb-player"><span class="lb-pname">${escapeHtml(p.name)}${statusTag}</span><span class="lb-country">${country}</span></td>`;
-                cells += `<td class="lb-score${p.status === 'MC' || p.status === 'WD' ? ' lb-mc' : ''}">${p.toParStr || "—"}</td>`;
+                // Show tee time if no score, or thru info
+                let scoreDisplay = p.toParStr || "—";
+                if (p.teeTime && p.total === null) {
+                    scoreDisplay = `<span class="lb-tee">${p.teeTime}</span>`;
+                } else if (p.thru && p.thru !== "F") {
+                    scoreDisplay += `<span class="lb-thru">Thru ${p.thru}</span>`;
+                } else if (p.thru === "F") {
+                    scoreDisplay += `<span class="lb-thru">F</span>`;
+                }
+                cells += `<td class="lb-player"><span class="lb-pname">${escapeHtml(p.name)}${statusTag}</span></td>`;
+                cells += `<td class="lb-score${p.status === 'MC' || p.status === 'WD' ? ' lb-mc' : ''}">${scoreDisplay}</td>`;
             } else {
                 cells += `<td class="lb-player">—</td><td class="lb-score">—</td>`;
             }
         }
 
         html += `<tr class="lb-row${isLeader ? ' lb-leader' : ''}">
-            <td class="lb-rank">${s.totalScore !== null ? rank : "—"}</td>
-            <td class="lb-team"><span class="lb-team-name">${escapeHtml(s.member.name)}</span><span class="lb-team-score">Total: ${s.toParStr}</span></td>
-            ${cells}
             <td class="lb-team-total${isLeader ? ' lb-leader' : ''}">${s.toParStr}</td>
+            <td class="lb-rank">${s.totalScore !== null ? rank : "—"}</td>
+            <td class="lb-team">${escapeHtml(s.member.name)}</td>
+            ${cells}
         </tr>`;
     });
 
