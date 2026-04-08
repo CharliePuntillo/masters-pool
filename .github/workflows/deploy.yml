@@ -23,9 +23,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Inject API key from secret
+      - name: Inject API key and cache-bust
         run: |
           sed -i 's/__ODDS_API_KEY__/${{ secrets.ODDS_API_KEY }}/g' index.html
+          HASH=$(git rev-parse --short HEAD)
+          sed -i "s/style.css/style.css?v=$HASH/g" index.html
+          sed -i "s/app.js/app.js?v=$HASH/g" index.html
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
