@@ -765,84 +765,96 @@ async function fetchLiveScores() {
     infoEl.innerHTML = '<span class="spinner"></span> Fetching live scores...';
 
     try {
-        // Try ESPN PGA scoreboard
-        const resp = await fetch("https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard");
-        if (!resp.ok) throw new Error("ESPN API error");
-        const data = await resp.json();
+        // Fetch both endpoints in parallel — header has tee times/thru, scoreboard has round scores
+        const [headerResp, scoreResp] = await Promise.all([
+            fetch("https://site.web.api.espn.com/apis/v2/scoreboard/header?sport=golf&league=pga"),
+            fetch("https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard"),
+        ]);
 
-        const events = data.events || [];
-        // Find Masters event (search for "Masters" in name)
-        let mastersEvent = events.find(e => e.name?.toLowerCase().includes("masters"));
-        // Fallback to first event
-        if (!mastersEvent && events.length > 0) mastersEvent = events[0];
+        // Parse header data (tee times, thru, status)
+        const headerData = headerResp.ok ? await headerResp.json() : null;
+        const headerEvent = headerData?.sports?.[0]?.leagues?.[0]?.events?.find(e => e.name?.toLowerCase().includes("masters"))
+            || headerData?.sports?.[0]?.leagues?.[0]?.events?.[0];
+        const headerPlayers = headerEvent?.competitors || [];
 
-        if (!mastersEvent) {
-            infoEl.textContent = "No active tournament found. Use Manual Entry for scores.";
-            return;
-        }
-
-        const competition = mastersEvent.competitions?.[0];
-        if (!competition) {
-            infoEl.textContent = "No competition data available.";
-            return;
-        }
-
-        // Parse tournament status
-        const status = competition.status?.type?.name || "STATUS_SCHEDULED";
-        let statusText = mastersEvent.name || "The Masters";
-        if (status === "STATUS_IN_PROGRESS") statusText += " — In Progress";
-        else if (status === "STATUS_FINAL") statusText += " — Final";
-        else if (status === "STATUS_SCHEDULED") statusText += " — Not Started";
-        else statusText += ` — ${competition.status?.type?.description || status}`;
-
-        const roundNum = competition.status?.period || 0;
-        if (roundNum > 0 && status === "STATUS_IN_PROGRESS") statusText += ` (Round ${roundNum})`;
-
-        infoEl.textContent = statusText;
-
-        // Parse player scores
-        const competitors = competition.competitors || [];
-        const scoreData = {};
-        const allRoundScores = { 1: [], 2: [], 3: [], 4: [] };
-
-        competitors.forEach(c => {
-            const name = c.athlete?.displayName || "";
-            const linescores = c.linescores || [];
-            const playerStatus = c.status?.type?.name || "";
-            const scores = {};
-            linescores.forEach((ls, i) => {
-                const roundScore = ls.value;
-                if (roundScore && roundScore > 0) {
-                    scores[`r${i + 1}`] = roundScore;
-                    allRoundScores[i + 1]?.push(roundScore);
-                }
-            });
-
-            let statusFlag = "";
-            if (playerStatus === "STATUS_CUT") statusFlag = "MC";
-            else if (playerStatus === "STATUS_WITHDRAWN" || c.status?.type?.description?.toLowerCase().includes("withdraw")) statusFlag = "WD";
-
-            // Extract tee time if player hasn't started their round
+        // Build tee time / thru lookup from header
+        const headerLookup = {};
+        headerPlayers.forEach(c => {
+            const name = c.displayName || "";
+            const st = c.status || {};
             let teeTime = "";
-            const teeTimeRaw = c.status?.teeTime || c.status?.startDate;
-            if (teeTimeRaw && (playerStatus === "STATUS_SCHEDULED" || playerStatus === "STATUS_TEE_TIME")) {
-                const d = new Date(teeTimeRaw);
+            if (st.state === "pre" && st.detail) {
+                teeTime = st.detail.replace(/ ET$/, "");
+            } else if (st.state === "pre" && st.teeTime) {
+                const d = new Date(st.teeTime);
                 if (!isNaN(d)) teeTime = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
             }
-
-            // Thru holes or "F" for finished round
             let thru = "";
-            const completedHoles = c.status?.period === roundNum ? (c.status?.thru || c.statistics?.find(s => s.name === "holesPlayed")?.displayValue || "") : "";
-            if (playerStatus === "STATUS_FINAL" || (completedHoles && parseInt(completedHoles) >= 18)) {
-                thru = "F";
-            } else if (playerStatus === "STATUS_IN_PROGRESS" && completedHoles) {
-                thru = completedHoles;
-            } else if (c.status?.displayValue) {
-                thru = c.status.displayValue;
-            }
+            if (st.state === "post" || st.thru >= 18) thru = "F";
+            else if (st.state === "in" && st.thru > 0) thru = String(st.thru);
 
-            scoreData[name] = { ...scores, status: statusFlag, teeTime, thru };
+            headerLookup[name] = { teeTime, thru };
         });
+
+        // Parse scoreboard data (round scores)
+        const scoreData = {};
+        const allRoundScores = { 1: [], 2: [], 3: [], 4: [] };
+        let tournamentName = "The Masters";
+        let tournamentStatus = "STATUS_SCHEDULED";
+        let roundNum = 0;
+
+        if (scoreResp.ok) {
+            const data = await scoreResp.json();
+            const events = data.events || [];
+            let mastersEvent = events.find(e => e.name?.toLowerCase().includes("masters")) || events[0];
+
+            if (mastersEvent) {
+                tournamentName = mastersEvent.name || tournamentName;
+                const competition = mastersEvent.competitions?.[0];
+                if (competition) {
+                    tournamentStatus = competition.status?.type?.name || tournamentStatus;
+                    roundNum = competition.status?.period || 0;
+
+                    (competition.competitors || []).forEach(c => {
+                        const name = c.athlete?.displayName || "";
+                        const linescores = c.linescores || [];
+                        const playerStatus = c.status?.type?.name || "";
+                        const scores = {};
+                        linescores.forEach((ls, i) => {
+                            const roundScore = ls.value;
+                            if (roundScore && roundScore > 0) {
+                                scores[`r${i + 1}`] = roundScore;
+                                allRoundScores[i + 1]?.push(roundScore);
+                            }
+                        });
+
+                        let statusFlag = "";
+                        if (playerStatus === "STATUS_CUT") statusFlag = "MC";
+                        else if (playerStatus === "STATUS_WITHDRAWN" || c.status?.type?.description?.toLowerCase().includes("withdraw")) statusFlag = "WD";
+
+                        const hl = headerLookup[name] || {};
+                        scoreData[name] = { ...scores, status: statusFlag, teeTime: hl.teeTime || "", thru: hl.thru || "" };
+                    });
+                }
+            }
+        }
+
+        // If scoreboard had no competitors but header did, populate from header
+        if (Object.keys(scoreData).length === 0 && headerPlayers.length > 0) {
+            headerPlayers.forEach(c => {
+                const name = c.displayName || "";
+                const hl = headerLookup[name] || {};
+                scoreData[name] = { status: "", teeTime: hl.teeTime || "", thru: hl.thru || "" };
+            });
+        }
+
+        // Status text
+        let statusText = tournamentName;
+        if (tournamentStatus === "STATUS_IN_PROGRESS") statusText += " — In Progress";
+        else if (tournamentStatus === "STATUS_FINAL") statusText += " — Final";
+        else if (tournamentStatus === "STATUS_SCHEDULED") statusText += " — Not Started";
+        if (roundNum > 0 && tournamentStatus === "STATUS_IN_PROGRESS") statusText += ` (Round ${roundNum})`;
+        infoEl.textContent = statusText;
 
         // Calculate daily averages
         const dailyAvg = {};
@@ -852,7 +864,7 @@ async function fetchLiveScores() {
             }
         }
 
-        state.liveScores = { scores: scoreData, dailyAvg, tournament: mastersEvent.name, status, lastUpdated: Date.now() };
+        state.liveScores = { scores: scoreData, dailyAvg, tournament: tournamentName, status: tournamentStatus, lastUpdated: Date.now() };
         saveState();
         renderLeaderboard();
     } catch (err) {
