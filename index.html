@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Masters Pool 2025</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#9971;</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-badge">
+                        <span class="logo-flag">&#9971;</span>
+                    </div>
+                    <div class="logo-text">
+                        <h1>The Masters Pool</h1>
+                        <span class="logo-year">Augusta National &middot; 2025</span>
+                    </div>
+                </div>
+                <nav class="nav" id="mainNav">
+                    <button class="nav-btn active" data-tab="setup">Setup</button>
+                    <button class="nav-btn" data-tab="draft">Draft</button>
+                    <button class="nav-btn" data-tab="leaderboard">Leaderboard</button>
+                    <button class="nav-btn" data-tab="rules">Rules</button>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+
+            <!-- ========== SETUP TAB ========== -->
+            <section id="tab-setup" class="tab-content active">
+                <div class="container">
+                    <div class="setup-grid">
+                        <!-- Add Members Card -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h2>Pool Members</h2>
+                                <span class="badge" id="memberCount">0 / 20</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="input-row">
+                                    <input type="text" id="memberNameInput" placeholder="Enter family member name..." maxlength="25" autocomplete="off">
+                                    <button class="btn btn-primary" id="addMemberBtn">Add</button>
+                                </div>
+                                <ul class="member-list" id="memberList">
+                                    <li class="member-empty">Add family members to get started</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Draft Settings Card -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h2>Draft Settings</h2>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="picksPerPerson">Players Per Person</label>
+                                    <div class="picks-selector">
+                                        <button class="pick-btn" data-picks="1">1</button>
+                                        <button class="pick-btn" data-picks="2">2</button>
+                                        <button class="pick-btn" data-picks="3">3</button>
+                                        <button class="pick-btn active" data-picks="4">4</button>
+                                        <button class="pick-btn" data-picks="5">5</button>
+                                        <button class="pick-btn" data-picks="6">6</button>
+                                        <button class="pick-btn" data-picks="7">7</button>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Draft Summary</label>
+                                    <div class="draft-summary" id="draftSummary">
+                                        <div class="summary-row">
+                                            <span>Members</span><span id="summMembers">0</span>
+                                        </div>
+                                        <div class="summary-row">
+                                            <span>Picks each</span><span id="summPicks">4</span>
+                                        </div>
+                                        <div class="summary-row">
+                                            <span>Total picks</span><span id="summTotal">0</span>
+                                        </div>
+                                        <div class="summary-row">
+                                            <span>Draft type</span><span>Snake</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="oddsApiKey">Live Odds API Key <span class="optional">(optional)</span></label>
+                                    <input type="text" id="oddsApiKey" placeholder="the-odds-api.com key...">
+                                    <small class="form-hint">Get a free key at <a href="https://the-odds-api.com" target="_blank" rel="noopener">the-odds-api.com</a> (500 req/mo free)</small>
+                                </div>
+                                <button class="btn btn-gold btn-large" id="startDraftBtn" disabled>
+                                    Randomize Order &amp; Start Draft
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Draft Order Preview -->
+                    <div class="card" id="draftOrderCard" style="display:none;">
+                        <div class="card-header">
+                            <h2>Draft Order (Randomized)</h2>
+                            <button class="btn btn-sm btn-outline" id="rerollBtn">Re-roll</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="draft-order-list" id="draftOrderList"></div>
+                            <button class="btn btn-gold btn-large" id="confirmDraftBtn">Confirm &amp; Begin Draft</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========== DRAFT TAB ========== -->
+            <section id="tab-draft" class="tab-content">
+                <div class="container">
+                    <!-- Draft not started message -->
+                    <div id="draftNotStarted" class="card text-center">
+                        <div class="card-body">
+                            <h2>Draft Not Started</h2>
+                            <p>Head to the Setup tab to add members and start the draft.</p>
+                            <button class="btn btn-primary" onclick="showTab('setup')">Go to Setup</button>
+                        </div>
+                    </div>
+
+                    <!-- Draft in progress -->
+                    <div id="draftInProgress" style="display:none;">
+                        <!-- Current Pick Banner -->
+                        <div class="pick-banner" id="pickBanner">
+                            <div class="pick-info">
+                                <span class="pick-round">Round <span id="pickRound">1</span></span>
+                                <span class="pick-number">Pick <span id="pickNum">1</span> of <span id="pickTotal">0</span></span>
+                            </div>
+                            <div class="pick-name" id="pickName">---</div>
+                            <div class="pick-actions">
+                                <button class="btn btn-sm btn-outline" id="undoPickBtn" disabled>Undo Last Pick</button>
+                            </div>
+                        </div>
+
+                        <!-- Draft Layout -->
+                        <div class="draft-layout">
+                            <!-- Player Pool -->
+                            <div class="card player-pool-card">
+                                <div class="card-header">
+                                    <h2>Available Players</h2>
+                                    <input type="text" id="playerSearch" class="search-input" placeholder="Search players...">
+                                </div>
+                                <div class="card-body no-pad">
+                                    <div class="player-pool-header">
+                                        <span class="ph-rank">#</span>
+                                        <span class="ph-name">Player</span>
+                                        <span class="ph-odds">Odds</span>
+                                        <span class="ph-action"></span>
+                                    </div>
+                                    <div class="player-pool" id="playerPool"></div>
+                                </div>
+                            </div>
+
+                            <!-- Draft Board -->
+                            <div class="card draft-board-card">
+                                <div class="card-header">
+                                    <h2>Draft Board</h2>
+                                </div>
+                                <div class="card-body no-pad">
+                                    <div class="draft-board-wrapper">
+                                        <table class="draft-board" id="draftBoard"></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Draft complete -->
+                    <div id="draftComplete" style="display:none;">
+                        <div class="celebration">
+                            <h2>Draft Complete!</h2>
+                            <p>The field is set. May the best golfer(s) win!</p>
+                            <button class="btn btn-gold" onclick="showTab('leaderboard')">View Leaderboard</button>
+                        </div>
+                        <div class="card draft-board-card">
+                            <div class="card-header">
+                                <h2>Final Draft Board</h2>
+                                <button class="btn btn-sm btn-danger" id="resetDraftBtn">Reset Draft</button>
+                            </div>
+                            <div class="card-body no-pad">
+                                <div class="draft-board-wrapper">
+                                    <table class="draft-board" id="finalDraftBoard"></table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========== LEADERBOARD TAB ========== -->
+            <section id="tab-leaderboard" class="tab-content">
+                <div class="container">
+                    <!-- Tournament Status -->
+                    <div class="tourney-status" id="tourneyStatus">
+                        <div class="tourney-badge">The Masters 2025</div>
+                        <div class="tourney-info" id="tourneyInfo">Tournament has not started</div>
+                        <div class="tourney-actions">
+                            <button class="btn btn-sm btn-primary" id="refreshScoresBtn">Refresh Scores</button>
+                            <button class="btn btn-sm btn-outline" id="manualScoresBtn">Manual Entry</button>
+                        </div>
+                    </div>
+
+                    <!-- Pool Leaderboard -->
+                    <div class="card" id="poolLeaderboardCard">
+                        <div class="card-header">
+                            <h2>Pool Standings</h2>
+                        </div>
+                        <div class="card-body no-pad">
+                            <div id="poolLeaderboard" class="pool-leaderboard">
+                                <p class="text-center text-muted pad">Complete the draft to see standings.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- WD Before R1 Replacements -->
+                    <div class="card" id="replacementCard" style="display:none;">
+                        <div class="card-header">
+                            <h2>Player Replacements (WD Before R1)</h2>
+                        </div>
+                        <div class="card-body">
+                            <div id="replacementList"></div>
+                        </div>
+                    </div>
+
+                    <!-- Manual Score Entry Modal -->
+                    <div class="modal-overlay" id="manualScoreModal" style="display:none;">
+                        <div class="modal">
+                            <div class="modal-header">
+                                <h3>Manual Score Entry</h3>
+                                <button class="modal-close" id="closeManualModal">&times;</button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="text-muted">Enter round scores for drafted players. Leave blank for rounds not yet played. Enter "MC" or "WD" in status.</p>
+                                <div id="manualScoreForm"></div>
+                                <div class="form-group" style="margin-top:1rem;">
+                                    <label>Daily Average (for MC/WD calculation)</label>
+                                    <div class="avg-inputs">
+                                        <div><label class="small-label">R1</label><input type="number" id="avgR1" class="score-input" placeholder="--"></div>
+                                        <div><label class="small-label">R2</label><input type="number" id="avgR2" class="score-input" placeholder="--"></div>
+                                        <div><label class="small-label">R3</label><input type="number" id="avgR3" class="score-input" placeholder="--"></div>
+                                        <div><label class="small-label">R4</label><input type="number" id="avgR4" class="score-input" placeholder="--"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-outline" id="cancelManualBtn">Cancel</button>
+                                <button class="btn btn-primary" id="saveManualBtn">Save Scores</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========== RULES TAB ========== -->
+            <section id="tab-rules" class="tab-content">
+                <div class="container">
+                    <div class="card rules-card">
+                        <div class="card-header">
+                            <h2>Pool Rules</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="rule">
+                                <h3>1. The Draft</h3>
+                                <p>Each pool member drafts between <strong>1 and 7 players</strong> from the Masters field. The draft follows a <strong>snake format</strong> with a randomized order.</p>
+                                <div class="rule-example">
+                                    <strong>Snake Draft Example (4 members, 3 picks each):</strong><br>
+                                    Round 1: A &rarr; B &rarr; C &rarr; D<br>
+                                    Round 2: D &rarr; C &rarr; B &rarr; A<br>
+                                    Round 3: A &rarr; B &rarr; C &rarr; D
+                                </div>
+                            </div>
+
+                            <div class="rule">
+                                <h3>2. Scoring</h3>
+                                <p><strong>Lowest cumulative score wins.</strong> Add up the total strokes for all your drafted players across all four rounds. The member with the lowest combined total wins the pot.</p>
+                            </div>
+
+                            <div class="rule">
+                                <h3>3. Missed Cut (MC) &amp; Withdrawal (WD)</h3>
+                                <p>If one of your players misses the cut or withdraws during the tournament, their remaining rounds are scored at the <strong>daily scoring average + 3 strokes</strong>. An incomplete round is also scored at the daily average + 3.</p>
+                                <div class="rule-example">
+                                    <strong>Example:</strong> Rory shoots 74-74 and MCs (+4 total through R2)<br>
+                                    Daily average for R3 = 73, R4 = 73<br>
+                                    Rory's MC score: R3 = 73+3 = 76, R4 = 73+3 = 76<br>
+                                    <strong>Total: 74 + 74 + 76 + 76 = 300 (+12)</strong>
+                                </div>
+                            </div>
+
+                            <div class="rule">
+                                <h3>4. Withdrawal Before Round 1</h3>
+                                <p>If a drafted player withdraws <strong>before Round 1 begins</strong>, the member who drafted that player may select a replacement from the <strong>undrafted player pool</strong>.</p>
+                            </div>
+
+                            <div class="rule">
+                                <h3>5. Winning</h3>
+                                <p>The pool member with the <strong>lowest total combined score</strong> across all their drafted players wins. In the event of a tie, the pot is split.</p>
+                            </div>
+
+                            <div class="azalea-divider"></div>
+                            <p class="text-center text-muted"><em>A tradition unlike any other.</em></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <p>A Tradition Unlike Any Other&trade; &middot; Masters Pool 2025</p>
+            </div>
+        </footer>
+
+        <!-- Confetti Canvas -->
+        <canvas id="confetti" class="confetti-canvas"></canvas>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
