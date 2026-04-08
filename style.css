@@ -390,9 +390,9 @@ input:focus, select:focus {
 
 .player-pool-header {
     display: grid;
-    grid-template-columns: 40px 1fr 80px 70px;
-    padding: 0.5rem 1rem;
-    font-size: 0.75rem;
+    grid-template-columns: 1fr 62px 62px 62px 60px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -408,21 +408,23 @@ input:focus, select:focus {
 
 .player-row {
     display: grid;
-    grid-template-columns: 40px 1fr 80px 70px;
-    padding: 0.45rem 1rem;
+    grid-template-columns: 1fr 62px 62px 62px 60px;
+    padding: 0.4rem 0.75rem;
     align-items: center;
     border-bottom: 1px solid var(--gray-100);
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     transition: var(--transition);
     cursor: pointer;
 }
 .player-row:hover { background: var(--green-pale); }
 
-.player-rank { font-weight: 600; color: var(--gray-500); font-size: 0.78rem; }
 .player-name-cell { font-weight: 500; }
 .player-country { font-size: 0.72rem; color: var(--gray-500); margin-left: 0.4rem; }
-.player-odds { font-size: 0.78rem; color: var(--blue); font-weight: 600; }
-.player-odds.no-odds { color: var(--gray-500); font-weight: 400; }
+.ph-odds { text-align: center; }
+.player-odds { font-size: 0.76rem; color: var(--blue); font-weight: 600; text-align: center; }
+.player-odds.odds-top5 { color: var(--green-dark); }
+.player-odds.odds-top10 { color: var(--gray-700); }
+.player-odds.no-odds { color: var(--gray-300); font-weight: 400; }
 
 /* ---- Draft Board ---- */
 .draft-board-card { overflow-x: auto; }
@@ -790,7 +792,11 @@ input:focus, select:focus {
     .nav-btn { font-size: 0.75rem; padding: 0.5rem 0.6rem; }
     .pick-banner { flex-direction: column; text-align: center; }
     .pick-name { font-size: 1.1rem; }
-    .player-pool-header, .player-row { grid-template-columns: 32px 1fr 65px 60px; font-size: 0.78rem; }
+    .player-pool-header, .player-row { grid-template-columns: 1fr 48px 48px 48px 50px; font-size: 0.72rem; }
+    .player-pool-header { padding: 0.4rem 0.5rem; font-size: 0.62rem; }
+    .player-row { padding: 0.35rem 0.5rem; }
+    .player-odds { font-size: 0.68rem; }
+    .player-country { display: none; }
     .search-input { width: 130px !important; }
     .tourney-status { flex-direction: column; text-align: center; padding: 0.75rem 1rem; }
     .tourney-badge { font-size: 1rem; }

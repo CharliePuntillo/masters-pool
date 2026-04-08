@@ -99,6 +99,105 @@ const MASTERS_FIELD = [
 ];
 
 // ──────────────────────────────────────────────
+// HARDCODED ODDS (DraftKings, April 2026)
+// win = outright winner, top5 = top 5 finish, top10 = top 10 finish
+// winNum used for sorting (lower = better favorite)
+// ──────────────────────────────────────────────
+const HARDCODED_ODDS = {
+    "Scottie Scheffler": { win: "+510", winNum: 510, top5: "+110", top10: "-186" },
+    "Jon Rahm": { win: "+900", winNum: 900, top5: "+174", top10: "-120" },
+    "Bryson DeChambeau": { win: "+1050", winNum: 1050, top5: "+210", top10: "+102" },
+    "Rory McIlroy": { win: "+1175", winNum: 1175, top5: "+230", top10: "+110" },
+    "Ludvig Aberg": { win: "+1650", winNum: 1650, top5: "+315", top10: "+152" },
+    "Xander Schauffele": { win: "+1750", winNum: 1750, top5: "+300", top10: "+138" },
+    "Cameron Young": { win: "+2200", winNum: 2200, top5: "+375", top10: "+176" },
+    "Tommy Fleetwood": { win: "+2250", winNum: 2250, top5: "+365", top10: "+166" },
+    "Matt Fitzpatrick": { win: "+2300", winNum: 2300, top5: "+385", top10: "+175" },
+    "Hideki Matsuyama": { win: "+2700", winNum: 2700, top5: "+435", top10: "+196" },
+    "Collin Morikawa": { win: "+3100", winNum: 3100, top5: "+485", top10: "+215" },
+    "Min Woo Lee": { win: "+3300", winNum: 3300, top5: "+530", top10: "+240" },
+    "Justin Rose": { win: "+3500", winNum: 3500, top5: "+580", top10: "+265" },
+    "Robert MacIntyre": { win: "+3500", winNum: 3500, top5: "+540", top10: "+240" },
+    "Brooks Koepka": { win: "+3700", winNum: 3700, top5: "+620", top10: "+285" },
+    "Patrick Reed": { win: "+4200", winNum: 4200, top5: "+650", top10: "+290" },
+    "Jordan Spieth": { win: "+4200", winNum: 4200, top5: "+640", top10: "+285" },
+    "Chris Gotterup": { win: "+4300", winNum: 4300, top5: "+670", top10: "+305" },
+    "Viktor Hovland": { win: "+4500", winNum: 4500, top5: "+690", top10: "+310" },
+    "Si Woo Kim": { win: "+5000", winNum: 5000, top5: "+690", top10: "+295" },
+    "Akshay Bhatia": { win: "+5100", winNum: 5100, top5: "+750", top10: "+325" },
+    "Russell Henley": { win: "+5400", winNum: 5400, top5: "+730", top10: "+310" },
+    "Justin Thomas": { win: "+5900", winNum: 5900, top5: "+900", top10: "+400" },
+    "Adam Scott": { win: "+6000", winNum: 6000, top5: "+840", top10: "+360" },
+    "Patrick Cantlay": { win: "+6400", winNum: 6400, top5: "+890", top10: "+380" },
+    "Jake Knapp": { win: "+6400", winNum: 6400, top5: "+930", top10: "+405" },
+    "Shane Lowry": { win: "+6600", winNum: 6600, top5: "+890", top10: "+375" },
+    "Jason Day": { win: "+6800", winNum: 6800, top5: "+910", top10: "+385" },
+    "J.J. Spaun": { win: "+6800", winNum: 6800, top5: "+970", top10: "+415" },
+    "Sam Burns": { win: "+7000", winNum: 7000, top5: "+980", top10: "+420" },
+    "Nicolai Hojgaard": { win: "+7400", winNum: 7400, top5: "+1025", top10: "+435" },
+    "Sepp Straka": { win: "+7600", winNum: 7600, top5: "+1025", top10: "+430" },
+    "Maverick McNealy": { win: "+7800", winNum: 7800, top5: "+1050", top10: "+440" },
+    "Tyrrell Hatton": { win: "+8000", winNum: 8000, top5: "+1075", top10: "+455" },
+    "Jacob Bridgeman": { win: "+8400", winNum: 8400, top5: "+1100", top10: "+455" },
+    "Corey Conners": { win: "+8400", winNum: 8400, top5: "+1100", top10: "+455" },
+    "Kurt Kitayama": { win: "+10000", winNum: 10000, top5: "+1300", top10: "+530" },
+    "Harris English": { win: "+10000", winNum: 10000, top5: "+1275", top10: "+510" },
+    "Ben Griffin": { win: "+11000", winNum: 11000, top5: "+1350", top10: "+540" },
+    "Cameron Smith": { win: "+11000", winNum: 11000, top5: "+1450", top10: "+590" },
+    "Sung-Jae Im": { win: "+11500", winNum: 11500, top5: "+1450", top10: "+580" },
+    "Gary Woodland": { win: "+12000", winNum: 12000, top5: "+1500", top10: "+620" },
+    "Max Homa": { win: "+12000", winNum: 12000, top5: "+1550", top10: "+650" },
+    "Daniel Berger": { win: "+12000", winNum: 12000, top5: "+1450", top10: "+580" },
+    "Rasmus Hojgaard": { win: "+13000", winNum: 13000, top5: "+1600", top10: "+660" },
+    "Keegan Bradley": { win: "+14000", winNum: 14000, top5: "+1650", top10: "+670" },
+    "Marco Penge": { win: "+14000", winNum: 14000, top5: "+1750", top10: "+710" },
+    "Harry Hall": { win: "+15000", winNum: 15000, top5: "+1750", top10: "+700" },
+    "Ryan Gerard": { win: "+15500", winNum: 15500, top5: "+1750", top10: "+700" },
+    "Alex Noren": { win: "+16000", winNum: 16000, top5: "+1800", top10: "+710" },
+    "Sam Stevens": { win: "+17000", winNum: 17000, top5: "+1950", top10: "+760" },
+    "Nick Taylor": { win: "+19000", winNum: 19000, top5: "+2050", top10: "+780" },
+    "Ryan Fox": { win: "+20000", winNum: 20000, top5: "+2250", top10: "+870" },
+    "Wyndham Clark": { win: "+20000", winNum: 20000, top5: "+2450", top10: "+970" },
+    "Michael Kim": { win: "+21000", winNum: 21000, top5: "+2350", top10: "+910" },
+    "Max Greyserman": { win: "+21000", winNum: 21000, top5: "+2350", top10: "+920" },
+    "Brian Harman": { win: "+21000", winNum: 21000, top5: "+2350", top10: "+890" },
+    "Kristoffer Reitan": { win: "+22000", winNum: 22000, top5: "+2450", top10: "+940" },
+    "Casey Jarvis": { win: "+23000", winNum: 23000, top5: "+2450", top10: "+950" },
+    "Carlos Ortiz": { win: "+23000", winNum: 23000, top5: "+2500", top10: "+970" },
+    "Sergio Garcia": { win: "+25000", winNum: 25000, top5: "+2700", top10: "+1000" },
+    "Dustin Johnson": { win: "+25000", winNum: 25000, top5: "+2700", top10: "+1025" },
+    "Aaron Rai": { win: "+25000", winNum: 25000, top5: "+2600", top10: "+1000" },
+    "Haotong Li": { win: "+27000", winNum: 27000, top5: "+2800", top10: "+1075" },
+    "Matt McCarty": { win: "+28000", winNum: 28000, top5: "+2900", top10: "+1075" },
+    "Andrew Novak": { win: "+29000", winNum: 29000, top5: "+3000", top10: "+1100" },
+    "Tom McKibbin": { win: "+29000", winNum: 29000, top5: "+3000", top10: "+1100" },
+    "Rasmus Neergaard-Petersen": { win: "+31000", winNum: 31000, top5: "+3200", top10: "+1200" },
+    "Nico Echavarria": { win: "+32500", winNum: 32500, top5: "+3200", top10: "+1200" },
+    "Sami Valimaki": { win: "+36000", winNum: 36000, top5: "+3600", top10: "+1275" },
+    "Aldrich Potgieter": { win: "+36000", winNum: 36000, top5: "+3700", top10: "+1375" },
+    "John Keefer": { win: "+36000", winNum: 36000, top5: "+3600", top10: "+1325" },
+    "Michael Brennan": { win: "+39000", winNum: 39000, top5: "+3900", top10: "+1425" },
+    "Bubba Watson": { win: "+52500", winNum: 52500, top5: "+4900", top10: "+1700" },
+    "Zach Johnson": { win: "+52500", winNum: 52500, top5: "+4700", top10: "+1600" },
+    "Charl Schwartzel": { win: "+62500", winNum: 62500, top5: "+5400", top10: "+1800" },
+    "Davis Riley": { win: "+82500", winNum: 82500, top5: "+7200", top10: "+2450" },
+    "Mason Howell": { win: "+200000", winNum: 200000, top5: "+15500", top10: "+4700" },
+    "Danny Willett": { win: "+225000", winNum: 225000, top5: "+16500", top10: "+4900" },
+    "Angel Cabrera": { win: "+300000", winNum: 300000, top5: "+22000", top10: "+6700" },
+    "Brian Campbell": { win: "+325000", winNum: 325000, top5: "+21000", top10: "+6000" },
+    "Ethan Fang": { win: "+325000", winNum: 325000, top5: "+23000", top10: "+6700" },
+    "Pongsapak Laopakdee": { win: "+350000", winNum: 350000, top5: "+26000", top10: "+7600" },
+    "Naoyuki Kataoka": { win: "+450000", winNum: 450000, top5: "+32500", top10: "+9000" },
+    "Brandon Holtz": { win: "+500000", winNum: 500000, top5: "+41000", top10: "+17000" },
+    "Vijay Singh": { win: "+500000", winNum: 500000, top5: "+49000", top10: "+17500" },
+    "Mike Weir": { win: "+500000", winNum: 500000, top5: "+49000", top10: "+23000" },
+    "Fred Couples": { win: "+500000", winNum: 500000, top5: "+49000", top10: "+18500" },
+    "Jose Maria Olazabal": { win: "+500000", winNum: 500000, top5: "+50000", top10: "+35000" },
+    "Mateo Pulcini": { win: "+500000", winNum: 500000, top5: "+50000", top10: "+24000" },
+    "Jackson Herrington": { win: "+500000", winNum: 500000, top5: "+49000", top10: "+18500" },
+};
+
+// ──────────────────────────────────────────────
 // STATE
 // ──────────────────────────────────────────────
 const STORAGE_KEY = "mastersPool2025";
@@ -421,16 +520,34 @@ function renderPlayerPool() {
     const search = (searchInput?.value || "").toLowerCase();
     const available = getAvailablePlayers();
 
+    // Attach odds data for sorting
+    const withOdds = available.map(p => {
+        const odds = getOddsForPlayer(p.name);
+        return { ...p, odds };
+    });
+
+    // Sort by win odds (best/lowest first), players without odds go to bottom
+    withOdds.sort((a, b) => {
+        const aNum = a.odds?.winNum ?? Infinity;
+        const bNum = b.odds?.winNum ?? Infinity;
+        return aNum - bNum;
+    });
+
     const filtered = search
-        ? available.filter(p => p.name.toLowerCase().includes(search) || p.country.toLowerCase().includes(search))
-        : available;
+        ? withOdds.filter(p => p.name.toLowerCase().includes(search) || p.country.toLowerCase().includes(search))
+        : withOdds;
 
     container.innerHTML = filtered.map(p => {
-        const odds = getOddsForPlayer(p.name);
+        const o = p.odds;
+        const win = o?.win || "—";
+        const top5 = o?.top5 || "—";
+        const top10 = o?.top10 || "—";
+        const hasOdds = o?.win;
         return `<div class="player-row" onclick="makePick('${escapeAttr(p.name)}')">
-            <span class="player-rank">${p.rank}</span>
             <span class="player-name-cell">${escapeHtml(p.name)} <span class="player-country">${p.country}</span></span>
-            <span class="player-odds ${odds === '—' ? 'no-odds' : ''}">${odds}</span>
+            <span class="player-odds ${hasOdds ? '' : 'no-odds'}">${win}</span>
+            <span class="player-odds ${hasOdds ? 'odds-top5' : 'no-odds'}">${top5}</span>
+            <span class="player-odds ${hasOdds ? 'odds-top10' : 'no-odds'}">${top10}</span>
             <span><button class="btn-pick">Draft</button></span>
         </div>`;
     }).join("");
@@ -546,9 +663,24 @@ async function fetchOdds() {
                     market.outcomes.forEach(o => {
                         const price = o.price;
                         const formatted = price > 0 ? `+${price}` : `${price}`;
-                        oddsMap[o.name] = formatted;
+                        oddsMap[o.name] = { win: formatted, winNum: price };
                     });
                 }
+            }
+            // Check all bookmakers for top 5 / top 20 markets
+            const top5Market = bookmakers.flatMap(b => b.markets || []).find(m => /top.*5/i.test(m.key));
+            const top20Market = bookmakers.flatMap(b => b.markets || []).find(m => /top.*20/i.test(m.key));
+            if (top5Market) {
+                top5Market.outcomes.forEach(o => {
+                    const entry = oddsMap[o.name] || (oddsMap[o.name] = {});
+                    entry.top5 = o.price > 0 ? `+${o.price}` : `${o.price}`;
+                });
+            }
+            if (top20Market) {
+                top20Market.outcomes.forEach(o => {
+                    const entry = oddsMap[o.name] || (oddsMap[o.name] = {});
+                    entry.top20 = o.price > 0 ? `+${o.price}` : `${o.price}`;
+                });
             }
         }
 
@@ -565,27 +697,28 @@ async function fetchOdds() {
 function normalize(s) {
     return s.toLowerCase()
         .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-        .replace(/ø/g, "o").replace(/æ/g, "ae").replace(/ð/g, "d");
+        .replace(/ø/g, "o").replace(/æ/g, "ae").replace(/ð/g, "d")
+        .replace(/[-.']/g, "").replace(/\s+/g, " ").trim();
 }
 
+// Returns { win, winNum, top5, top20 } or null
 function getOddsForPlayer(playerName) {
-    if (!state.oddsCache?.data) return "—";
+    const src = state.oddsCache?.data || HARDCODED_ODDS;
+    if (!src) return null;
 
     // Exact match
-    if (state.oddsCache.data[playerName]) return state.oddsCache.data[playerName];
+    if (src[playerName]) return src[playerName];
 
     const norm = normalize(playerName);
     const firstName = norm.split(" ")[0];
     const lastName = norm.split(" ").pop();
 
-    for (const [key, val] of Object.entries(state.oddsCache.data)) {
+    for (const [key, val] of Object.entries(src)) {
         const nk = normalize(key);
-        // Exact normalized match
         if (nk === norm) return val;
-        // Last name + first name substring match (handles Matt/Matthew, Alex/Alexander)
         if (nk.includes(lastName) && nk.includes(firstName)) return val;
     }
-    return "—";
+    return null;
 }
 
 // ──────────────────────────────────────────────
