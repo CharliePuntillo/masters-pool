@@ -1012,7 +1012,6 @@ function renderLeaderboard() {
         <thead>
             <tr class="lb-head-top">
                 <th class="lb-total-head" rowspan="2">Tot</th>
-                <th class="lb-rank-head" rowspan="2">#</th>
                 <th class="lb-team-head" rowspan="2">Team</th>
                 ${roundHeaders}
             </tr>
@@ -1047,7 +1046,6 @@ function renderLeaderboard() {
 
         html += `<tr class="lb-row${isLeader ? ' lb-leader' : ''}">
             <td class="lb-team-total${isLeader ? ' lb-leader' : ''}">${s.toParStr}</td>
-            <td class="lb-rank">${s.totalScore !== null ? rank : "—"}</td>
             <td class="lb-team">${escapeHtml(s.member.name)}</td>
             ${cells}
         </tr>`;
