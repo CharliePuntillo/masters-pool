@@ -373,6 +373,9 @@ input:focus, select:focus {
     flex-wrap: wrap;
     gap: 0.75rem;
     box-shadow: var(--shadow-md);
+    position: sticky;
+    top: 60px;
+    z-index: 50;
 }
 .pick-info { display: flex; gap: 1rem; font-size: 0.85rem; opacity: 0.85; }
 .pick-round, .pick-number { background: rgba(255,255,255,0.15); padding: 0.2rem 0.6rem; border-radius: 4px; }
@@ -444,7 +447,11 @@ input:focus, select:focus {
     white-space: nowrap;
     font-family: var(--font-display);
     font-size: 0.75rem;
+    position: sticky;
+    top: 0;
+    z-index: 2;
 }
+.draft-board th:first-child { position: sticky; left: 0; z-index: 3; }
 .draft-board th.round-header { background: var(--green-mid); text-align: center; }
 
 .draft-board td {
@@ -456,6 +463,9 @@ input:focus, select:focus {
     font-weight: 600;
     background: var(--cream);
     white-space: nowrap;
+    position: sticky;
+    left: 0;
+    z-index: 1;
 }
 .draft-board td.pick-cell { text-align: center; min-width: 80px; }
 .draft-board td.pick-cell.current-pick { background: var(--gold-glow); border: 2px solid var(--gold); }
