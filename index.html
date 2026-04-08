@@ -25,8 +25,7 @@
                     </div>
                 </div>
                 <nav class="nav" id="mainNav">
-                    <button class="nav-btn active" data-tab="setup">Setup</button>
-                    <button class="nav-btn" data-tab="draft">Draft</button>
+                    <button class="nav-btn active" data-tab="draft">Draft</button>
                     <button class="nav-btn" data-tab="leaderboard">Leaderboard</button>
                     <button class="nav-btn" data-tab="rules">Rules</button>
                 </nav>
@@ -36,97 +35,81 @@
         <!-- Main Content -->
         <main class="main">
 
-            <!-- ========== SETUP TAB ========== -->
-            <section id="tab-setup" class="tab-content active">
-                <div class="container">
-                    <div class="setup-grid">
-                        <!-- Add Members Card -->
-                        <div class="card">
-                            <div class="card-header">
-                                <h2>Pool Members</h2>
-                                <span class="badge" id="memberCount">0 / 20</span>
-                            </div>
-                            <div class="card-body">
-                                <div class="input-row">
-                                    <input type="text" id="memberNameInput" placeholder="Enter family member name..." maxlength="25" autocomplete="off">
-                                    <button class="btn btn-primary" id="addMemberBtn">Add</button>
-                                </div>
-                                <ul class="member-list" id="memberList">
-                                    <li class="member-empty">Add family members to get started</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <!-- Draft Settings Card -->
-                        <div class="card">
-                            <div class="card-header">
-                                <h2>Draft Settings</h2>
-                            </div>
-                            <div class="card-body">
-                                <div class="form-group">
-                                    <label for="picksPerPerson">Players Per Person</label>
-                                    <div class="picks-selector">
-                                        <button class="pick-btn" data-picks="1">1</button>
-                                        <button class="pick-btn" data-picks="2">2</button>
-                                        <button class="pick-btn" data-picks="3">3</button>
-                                        <button class="pick-btn active" data-picks="4">4</button>
-                                        <button class="pick-btn" data-picks="5">5</button>
-                                        <button class="pick-btn" data-picks="6">6</button>
-                                        <button class="pick-btn" data-picks="7">7</button>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label>Draft Summary</label>
-                                    <div class="draft-summary" id="draftSummary">
-                                        <div class="summary-row">
-                                            <span>Members</span><span id="summMembers">0</span>
-                                        </div>
-                                        <div class="summary-row">
-                                            <span>Picks each</span><span id="summPicks">4</span>
-                                        </div>
-                                        <div class="summary-row">
-                                            <span>Total picks</span><span id="summTotal">0</span>
-                                        </div>
-                                        <div class="summary-row">
-                                            <span>Draft type</span><span>Snake</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="oddsApiKey">Live Odds API Key <span class="optional">(optional)</span></label>
-                                    <input type="password" id="oddsApiKey" placeholder="the-odds-api.com key...">
-                                    <small class="form-hint">Get a free key at <a href="https://the-odds-api.com" target="_blank" rel="noopener">the-odds-api.com</a> (500 req/mo free)</small>
-                                </div>
-                                <button class="btn btn-gold btn-large" id="startDraftBtn" disabled>
-                                    Randomize Order &amp; Start Draft
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Draft Order Preview -->
-                    <div class="card" id="draftOrderCard" style="display:none;">
-                        <div class="card-header">
-                            <h2>Draft Order (Randomized)</h2>
-                            <button class="btn btn-sm btn-outline" id="rerollBtn">Re-roll</button>
-                        </div>
-                        <div class="card-body">
-                            <div class="draft-order-list" id="draftOrderList"></div>
-                            <button class="btn btn-gold btn-large" id="confirmDraftBtn">Confirm &amp; Begin Draft</button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
             <!-- ========== DRAFT TAB ========== -->
-            <section id="tab-draft" class="tab-content">
+            <section id="tab-draft" class="tab-content active">
                 <div class="container">
-                    <!-- Draft not started message -->
-                    <div id="draftNotStarted" class="card text-center">
-                        <div class="card-body">
-                            <h2>Draft Not Started</h2>
-                            <p>Head to the Setup tab to add members and start the draft.</p>
-                            <button class="btn btn-primary" onclick="showTab('setup')">Go to Setup</button>
+                    <!-- Setup (shown before draft starts) -->
+                    <div id="draftSetup">
+                        <div class="setup-grid">
+                            <!-- Add Members Card -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h2>Pool Members</h2>
+                                    <span class="badge" id="memberCount">0 / 20</span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="input-row">
+                                        <input type="text" id="memberNameInput" placeholder="Enter family member name..." maxlength="25" autocomplete="off">
+                                        <button class="btn btn-primary" id="addMemberBtn">Add</button>
+                                    </div>
+                                    <ul class="member-list" id="memberList">
+                                        <li class="member-empty">Add family members to get started</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Draft Settings Card -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h2>Draft Settings</h2>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label for="picksPerPerson">Players Per Person</label>
+                                        <div class="picks-selector">
+                                            <button class="pick-btn" data-picks="1">1</button>
+                                            <button class="pick-btn" data-picks="2">2</button>
+                                            <button class="pick-btn" data-picks="3">3</button>
+                                            <button class="pick-btn active" data-picks="4">4</button>
+                                            <button class="pick-btn" data-picks="5">5</button>
+                                            <button class="pick-btn" data-picks="6">6</button>
+                                            <button class="pick-btn" data-picks="7">7</button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Draft Summary</label>
+                                        <div class="draft-summary" id="draftSummary">
+                                            <div class="summary-row">
+                                                <span>Members</span><span id="summMembers">0</span>
+                                            </div>
+                                            <div class="summary-row">
+                                                <span>Picks each</span><span id="summPicks">4</span>
+                                            </div>
+                                            <div class="summary-row">
+                                                <span>Total picks</span><span id="summTotal">0</span>
+                                            </div>
+                                            <div class="summary-row">
+                                                <span>Draft type</span><span>Snake</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-gold btn-large" id="startDraftBtn" disabled>
+                                        Randomize Order &amp; Start Draft
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Draft Order Preview -->
+                        <div class="card" id="draftOrderCard" style="display:none;">
+                            <div class="card-header">
+                                <h2>Draft Order (Randomized)</h2>
+                                <button class="btn btn-sm btn-outline" id="rerollBtn">Re-roll</button>
+                            </div>
+                            <div class="card-body">
+                                <div class="draft-order-list" id="draftOrderList"></div>
+                                <button class="btn btn-gold btn-large" id="confirmDraftBtn">Confirm &amp; Begin Draft</button>
+                            </div>
                         </div>
                     </div>
 
@@ -212,14 +195,9 @@
                     </div>
 
                     <!-- Pool Leaderboard -->
-                    <div class="card" id="poolLeaderboardCard">
-                        <div class="card-header">
-                            <h2>Pool Standings</h2>
-                        </div>
-                        <div class="card-body no-pad">
-                            <div id="poolLeaderboard" class="pool-leaderboard">
-                                <p class="text-center text-muted pad">Complete the draft to see standings.</p>
-                            </div>
+                    <div class="card lb-card" id="poolLeaderboardCard">
+                        <div id="poolLeaderboard">
+                            <p class="text-center text-muted pad">Complete the draft to see standings.</p>
                         </div>
                     </div>
 

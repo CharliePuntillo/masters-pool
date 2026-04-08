@@ -133,6 +133,9 @@ function saveState() {
 // NAVIGATION
 // ──────────────────────────────────────────────
 function showTab(tabId) {
+    // Normalize legacy "setup" references to "draft"
+    if (tabId === "setup") tabId = "draft";
+
     document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
     document.querySelectorAll(".nav-btn").forEach(el => el.classList.remove("active"));
     const tab = document.getElementById("tab-" + tabId);
@@ -187,14 +190,6 @@ function initSetup() {
             saveState();
             renderSetup();
         });
-    });
-
-    // Odds API key
-    const oddsInput = document.getElementById("oddsApiKey");
-    oddsInput.value = state.oddsApiKey || "";
-    oddsInput.addEventListener("change", () => {
-        state.oddsApiKey = oddsInput.value.trim();
-        saveState();
     });
 
     renderSetup();
@@ -365,7 +360,7 @@ function resetDraft() {
     document.querySelectorAll(".pick-btn").forEach(b => b.disabled = false);
     saveState();
     renderSetup();
-    showTab("setup");
+    showTab("draft");
 }
 
 // ──────────────────────────────────────────────
@@ -374,16 +369,17 @@ function resetDraft() {
 let oddsData = {}; // {playerName: string}
 
 function renderDraft() {
-    const notStarted = document.getElementById("draftNotStarted");
+    const setup = document.getElementById("draftSetup");
     const inProgress = document.getElementById("draftInProgress");
     const complete = document.getElementById("draftComplete");
 
-    notStarted.style.display = "none";
+    setup.style.display = "none";
     inProgress.style.display = "none";
     complete.style.display = "none";
 
     if (state.draftPhase === "setup" || state.draftPhase === "ordering") {
-        notStarted.style.display = "";
+        setup.style.display = "";
+        renderSetup();
         return;
     }
 
@@ -808,71 +804,72 @@ function renderLeaderboard() {
     }
 
     const standings = calculatePoolStandings();
+    const numPicks = state.picksPerPerson;
 
-    // Helper: format a round score relative to par
-    function fmtRound(score) {
-        if (score == null) return "—";
-        const diff = score - PAR;
-        return diff === 0 ? "E" : (diff > 0 ? `+${diff}` : `${diff}`);
+    // Find player country
+    function getCountry(name) {
+        const p = MASTERS_FIELD.find(f => f.name === name);
+        return p ? p.country : "";
     }
 
-    // Summary leaderboard table
-    let html = `<table class="pool-summary-table">
-        <thead><tr>
-            <th>#</th>
-            <th>Member</th>
-            <th>Total</th>
-        </tr></thead>
-        <tbody>${standings.map((s, i) => {
-            const rank = i + 1;
-            const isLeader = rank === 1 && s.totalScore !== null;
-            return `<tr class="${isLeader ? 'summary-leader' : ''}">
-                <td class="pool-rank${isLeader ? ' first' : ''}">${s.totalScore !== null ? rank : "—"}</td>
-                <td class="pool-summary-name">${escapeHtml(s.member.name)}</td>
-                <td class="pool-summary-score${isLeader ? ' leader' : ''}">${s.toParStr}</td>
-            </tr>`;
-        }).join("")}</tbody>
-    </table>`;
+    // Build header: RANK | TEAM | R1 (Player/Score) ... Rn | TEAM TOTAL
+    let roundHeaders = "";
+    let subHeaders = "";
+    for (let r = 1; r <= numPicks; r++) {
+        roundHeaders += `<th class="lb-round-header" colspan="2">R${r}</th>`;
+        subHeaders += `<th class="lb-sub">Player</th><th class="lb-sub lb-sub-score">Score</th>`;
+    }
 
-    // Detailed breakdown per member
+    // Updated timestamp
+    let updatedStr = "";
+    if (state.liveScores) {
+        const d = new Date(state.liveScores.lastUpdated);
+        updatedStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    }
+
+    let html = `<div class="lb-header-bar">
+        <div class="lb-title">Final Draft Leaderboard</div>
+        ${updatedStr ? `<div class="lb-updated">Updated: ${updatedStr}</div>` : ""}
+    </div>
+    <div class="lb-scroll">
+    <table class="lb-table">
+        <thead>
+            <tr class="lb-head-top">
+                <th class="lb-rank-head" rowspan="2">Rank</th>
+                <th class="lb-team-head" rowspan="2">Team</th>
+                ${roundHeaders}
+                <th class="lb-total-head" rowspan="2">Team<br>Total</th>
+            </tr>
+            <tr class="lb-head-sub">${subHeaders}</tr>
+        </thead>
+        <tbody>`;
+
     standings.forEach((s, i) => {
         const rank = i + 1;
         const isLeader = rank === 1 && s.totalScore !== null;
 
-        html += `<div class="pool-member-block${isLeader ? ' leader' : ''}">
-            <div class="pool-member-header">
-                <span class="pool-rank${isLeader ? ' first' : ''}">${s.totalScore !== null ? rank : "—"}</span>
-                <span class="pool-member-name">${escapeHtml(s.member.name)}</span>
-                <span class="pool-topar${isLeader ? ' leader' : ''}">${s.toParStr}</span>
-            </div>
-            <table class="pool-player-table">
-                <thead><tr>
-                    <th>Player</th>
-                    <th>R1</th>
-                    <th>R2</th>
-                    <th>R3</th>
-                    <th>R4</th>
-                    <th>Total</th>
-                </tr></thead>
-                <tbody>
-                    ${s.players.map(p => {
-                        const statusClass = p.status === "MC" ? " mc" : (p.status === "WD" ? " wd" : "");
-                        const parts = p.name.split(" ");
-                        const shortName = parts.length > 1 ? parts[0][0] + ". " + parts[parts.length - 1] : p.name;
-                        return `<tr class="pool-player-row${statusClass}">
-                            <td class="pp-name"><span class="pp-full">${escapeHtml(p.name)}</span><span class="pp-short">${escapeHtml(shortName)}</span>${p.status ? ` <span class="pp-status">${p.status}</span>` : ""}</td>
-                            <td class="pp-round">${fmtRound(p.rounds[0])}</td>
-                            <td class="pp-round">${fmtRound(p.rounds[1])}</td>
-                            <td class="pp-round">${fmtRound(p.rounds[2])}</td>
-                            <td class="pp-round">${fmtRound(p.rounds[3])}</td>
-                            <td class="pp-topar${statusClass}">${p.toParStr || "—"}</td>
-                        </tr>`;
-                    }).join("")}
-                </tbody>
-            </table>
-        </div>`;
+        let cells = "";
+        for (let r = 0; r < numPicks; r++) {
+            const p = s.players[r];
+            if (p) {
+                const country = getCountry(p.name);
+                const statusTag = p.status ? ` <span class="lb-status">${p.status}</span>` : "";
+                cells += `<td class="lb-player"><span class="lb-pname">${escapeHtml(p.name)}${statusTag}</span><span class="lb-country">${country}</span></td>`;
+                cells += `<td class="lb-score${p.status === 'MC' || p.status === 'WD' ? ' lb-mc' : ''}">${p.toParStr || "—"}</td>`;
+            } else {
+                cells += `<td class="lb-player">—</td><td class="lb-score">—</td>`;
+            }
+        }
+
+        html += `<tr class="lb-row${isLeader ? ' lb-leader' : ''}">
+            <td class="lb-rank">${s.totalScore !== null ? rank : "—"}</td>
+            <td class="lb-team"><span class="lb-team-name">${escapeHtml(s.member.name)}</span><span class="lb-team-score">Total: ${s.toParStr}</span></td>
+            ${cells}
+            <td class="lb-team-total${isLeader ? ' lb-leader' : ''}">${s.toParStr}</td>
+        </tr>`;
     });
 
+    html += `</tbody></table></div>`;
     container.innerHTML = html;
 
     // Check for WD before R1 replacements
@@ -1121,9 +1118,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Restore odds cache
     if (state.oddsCache?.data) oddsData = state.oddsCache.data;
 
-    // If draft was in progress, go to draft tab
-    if (state.draftPhase === "drafting") showTab("draft");
-    else if (state.draftPhase === "complete") showTab("leaderboard");
+    // Show appropriate tab based on draft state
+    if (state.draftPhase === "complete") showTab("leaderboard");
+    else showTab("draft");
 
     // Auto-refresh scores every 30 seconds when draft is complete
     if (state.draftPhase === "complete") {

@@ -505,110 +505,151 @@ input:focus, select:focus {
 .tourney-status .btn-primary { background: var(--gold); color: var(--black); }
 
 /* ---- Pool Leaderboard ---- */
-/* Pool summary leaderboard */
-.pool-summary-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 1.25rem;
-    background: var(--white);
-    border-radius: var(--radius);
-    overflow: hidden;
-    box-shadow: var(--shadow-md);
-}
-.pool-summary-table thead th {
-    background: var(--green-dark);
-    color: var(--white);
-    padding: 0.6rem 1rem;
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-align: left;
-}
-.pool-summary-table thead th:first-child { width: 40px; text-align: center; }
-.pool-summary-table thead th:last-child { text-align: right; }
-.pool-summary-table td {
-    padding: 0.55rem 1rem;
-    border-bottom: 1px solid var(--gray-100);
-    font-size: 0.88rem;
-}
-.pool-summary-table tbody tr:last-child td { border-bottom: none; }
-.pool-summary-table tbody tr:hover td { background: var(--green-pale); }
-.pool-summary-table tr.summary-leader td { background: var(--cream); }
-.pool-summary-name { font-weight: 600; }
-.pool-summary-score { text-align: right; font-weight: 700; font-family: var(--font-display); font-size: 1rem; color: var(--green-dark); }
-.pool-summary-score.leader { color: var(--gold); }
+.lb-card { overflow: hidden; }
 
-/* Pool member block */
-.pool-member-block {
-    background: var(--white);
-    border-radius: var(--radius);
-    margin-bottom: 1rem;
-    border: 1px solid var(--gray-100);
-    overflow-x: auto;
-}
-.pool-member-block.leader {
-    border: 2px solid var(--gold);
-    box-shadow: 0 0 12px var(--gold-glow);
-}
-
-.pool-member-header {
+/* ---- Draft Leaderboard (wide table) ---- */
+.lb-header-bar {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    background: var(--green-dark);
-    color: var(--white);
+    justify-content: space-between;
+    background: var(--cream);
+    padding: 0.75rem 1.25rem;
+    border-bottom: 3px solid var(--green-dark);
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.lb-title {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 1.2rem;
+    color: var(--green-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.lb-updated {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
 }
 
-.pool-rank {
+.lb-scroll { overflow-x: auto; }
+
+.lb-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 700px;
+    font-size: 0.82rem;
+}
+
+/* Header rows */
+.lb-head-top th {
+    background: var(--green-dark);
+    color: var(--white);
+    padding: 0.5rem 0.6rem;
+    font-weight: 700;
+    text-align: center;
+    font-size: 0.82rem;
+    border-right: 1px solid rgba(255,255,255,0.15);
+}
+.lb-rank-head, .lb-team-head { text-align: left; }
+.lb-rank-head { width: 50px; text-align: center; }
+.lb-team-head { min-width: 100px; }
+.lb-total-head { width: 70px; }
+
+.lb-head-sub th {
+    background: var(--cream);
+    color: var(--gray-500);
+    padding: 0.3rem 0.5rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    border-bottom: 2px solid var(--gray-100);
+    border-right: 1px solid var(--gray-100);
+}
+.lb-sub { text-align: left; }
+.lb-sub-score { text-align: center; width: 48px; }
+
+/* Body rows */
+.lb-row { border-bottom: 1px solid var(--gray-100); }
+.lb-row:hover td { background: var(--green-pale); }
+.lb-row.lb-leader td { background: var(--cream); }
+
+.lb-row td {
+    padding: 0.6rem 0.5rem;
+    vertical-align: middle;
+    border-right: 1px solid var(--gray-100);
+}
+.lb-row td:last-child { border-right: none; }
+
+.lb-rank {
+    text-align: center;
     font-weight: 700;
     font-family: var(--font-display);
     font-size: 1.1rem;
-    min-width: 28px;
-    text-align: center;
-}
-.pool-rank.first { color: var(--gold); font-size: 1.3rem; }
-
-.pool-member-name { font-weight: 700; font-size: 1rem; flex: 1; }
-
-.pool-topar { font-weight: 700; font-family: var(--font-display); font-size: 1.15rem; }
-.pool-topar.leader { color: var(--gold); }
-
-/* Player table within each member block */
-.pool-player-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-.pool-player-table thead th {
-    background: var(--cream);
     color: var(--green-dark);
-    padding: 0.45rem 0.6rem;
-    font-size: 0.72rem;
+}
+.lb-leader .lb-rank { color: var(--gold); }
+
+.lb-team {
+    white-space: nowrap;
+}
+.lb-team-name {
+    display: block;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    text-align: center;
-    border-bottom: 1px solid var(--gray-100);
+    font-size: 0.88rem;
 }
-.pool-player-table thead th:first-child { text-align: left; padding-left: 1rem; }
-
-.pool-player-table td {
-    padding: 0.5rem 0.6rem;
-    font-size: 0.82rem;
-    text-align: center;
-    border-bottom: 1px solid var(--gray-100);
+.lb-team-score {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--green-dark);
+    font-weight: 600;
 }
-.pool-player-table tbody tr:last-child td { border-bottom: none; }
-.pool-player-table tbody tr:hover td { background: var(--green-pale); }
 
-.pp-name { text-align: left !important; padding-left: 1rem !important; font-weight: 600; white-space: nowrap; }
-.pp-short { display: none; }
-.pp-status { font-size: 0.68rem; font-weight: 700; padding: 0.1rem 0.35rem; border-radius: 3px; margin-left: 0.3rem; }
-.pool-player-row.mc .pp-status { background: var(--red-light); color: var(--red); }
-.pool-player-row.wd .pp-status { background: #fce4ec; color: var(--azalea); }
+.lb-player {
+    min-width: 110px;
+}
+.lb-pname {
+    display: block;
+    font-weight: 600;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+.lb-country {
+    display: block;
+    font-size: 0.68rem;
+    color: var(--gray-500);
+}
+.lb-status {
+    font-size: 0.62rem;
+    font-weight: 700;
+    padding: 0.05rem 0.3rem;
+    border-radius: 3px;
+    margin-left: 0.2rem;
+    background: var(--red-light);
+    color: var(--red);
+}
 
-.pp-round { color: var(--gray-700); font-family: var(--font-display); }
-.pp-topar { font-weight: 700; font-family: var(--font-display); color: var(--green-dark); }
-.pp-topar.mc, .pp-topar.wd { color: var(--red); }
+.lb-score {
+    text-align: center;
+    font-weight: 700;
+    font-family: var(--font-display);
+    font-size: 0.88rem;
+    color: var(--green-dark);
+}
+.lb-score.lb-mc { color: var(--red); }
+
+.lb-team-total {
+    text-align: center;
+    font-weight: 900;
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    color: var(--green-dark);
+    background: var(--cream);
+}
+.lb-team-total.lb-leader { color: var(--gold); }
 
 /* ---- Rules ---- */
 .rules-card .card-body { max-width: 700px; margin: 0 auto; }
@@ -756,36 +797,14 @@ input:focus, select:focus {
     .tourney-info { font-size: 0.78rem; }
     .tourney-actions { width: 100%; justify-content: center; }
 
-    /* Summary table */
-    .pool-summary-table td, .pool-summary-table thead th { padding: 0.4rem 0.6rem; }
-    .pool-summary-table td { font-size: 0.82rem; }
-    .pool-summary-score { font-size: 0.9rem; }
-
-    /* Leaderboard blocks — compact for 8 members */
-    .pool-member-block { margin-bottom: 0.6rem; border-radius: var(--radius-sm); }
-    .pool-member-header { padding: 0.5rem 0.6rem; gap: 0.5rem; }
-    .pool-rank { font-size: 0.95rem; min-width: 22px; }
-    .pool-rank.first { font-size: 1.1rem; }
-    .pool-member-name { font-size: 0.88rem; }
-    .pool-topar { font-size: 1rem; }
-
-    /* Player table — tight columns for mobile */
-    .pool-player-table { font-size: 0.7rem; }
-    .pool-player-table thead th {
-        padding: 0.3rem 0.2rem;
-        font-size: 0.62rem;
-        letter-spacing: 0;
-    }
-    .pool-player-table thead th:first-child { padding-left: 0.5rem; }
-    .pool-player-table td { padding: 0.35rem 0.2rem; }
-
-    /* Show abbreviated names on mobile */
-    .pp-full { display: none; }
-    .pp-short { display: inline; }
-    .pp-name { padding-left: 0.5rem !important; }
-    .pp-status { margin-left: 0.15rem; font-size: 0.58rem; padding: 0.05rem 0.2rem; }
-    .pp-round { font-size: 0.72rem; }
-    .pp-topar { font-size: 0.72rem; }
+    /* Leaderboard — scrollable on mobile */
+    .lb-header-bar { padding: 0.5rem 0.75rem; }
+    .lb-title { font-size: 1rem; }
+    .lb-table { font-size: 0.75rem; }
+    .lb-pname { font-size: 0.72rem; }
+    .lb-row td { padding: 0.4rem 0.35rem; }
+    .lb-player { min-width: 90px; }
+    .lb-team-total { font-size: 1rem; }
 
     /* Celebration */
     .celebration { padding: 1.5rem 0.75rem; }
