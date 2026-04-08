@@ -203,7 +203,11 @@ const HARDCODED_ODDS = {
 // ──────────────────────────────────────────────
 const SUPABASE_URL = "https://phdexjpwjweinjnciaqn.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBoZGV4anB3andlaW5qbmNpYXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5MjcxMTgsImV4cCI6MjA4NjUwMzExOH0.5Zq1e-8WvR0ixs5qC3u3928dvw-rliJ_qMuZibhmD7U";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+let sb = null; // initialized in DOMContentLoaded
+function getSupabase() {
+    if (!sb && window.supabase) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    return sb;
+}
 
 const STORAGE_KEY = "mastersPool2026";
 const PAR = 72; // Augusta National par
@@ -228,13 +232,16 @@ let _savingToSupabase = false;
 // Load from Supabase first, fall back to localStorage
 async function loadStateFromSupabase() {
     try {
-        const { data, error } = await supabase
-            .from("draft_state")
-            .select("state")
-            .eq("id", 1)
-            .single();
-        if (!error && data?.state && Object.keys(data.state).length > 0) {
-            return data.state;
+        const client = getSupabase();
+        if (client) {
+            const { data, error } = await client
+                .from("draft_state")
+                .select("state")
+                .eq("id", 1)
+                .single();
+            if (!error && data?.state && Object.keys(data.state).length > 0) {
+                return data.state;
+            }
         }
     } catch (e) { console.warn("Supabase load failed:", e); }
     // Fall back to localStorage
@@ -254,17 +261,22 @@ async function saveState() {
         const shared = { ...state };
         delete shared.liveScores; // too large + fetched independently per client
         delete shared.oddsCache;
-        await supabase
-            .from("draft_state")
-            .update({ state: shared, updated_at: new Date().toISOString() })
-            .eq("id", 1);
+        const client = getSupabase();
+        if (client) {
+            await client
+                .from("draft_state")
+                .update({ state: shared, updated_at: new Date().toISOString() })
+                .eq("id", 1);
+        }
     } catch (e) { console.warn("Supabase save failed:", e); }
     _savingToSupabase = false;
 }
 
 // Real-time subscription — when another device saves, update local state
 function subscribeToRealtimeUpdates() {
-    supabase
+    const client = getSupabase();
+    if (!client) return;
+    client
         .channel("draft_state_changes")
         .on("postgres_changes", { event: "UPDATE", schema: "public", table: "draft_state" }, (payload) => {
             const remote = payload.new?.state;
@@ -424,12 +436,11 @@ function renderSetup() {
         orderCard.style.display = "none";
     }
 
-    // Disable inputs if draft already started
-    if (state.draftPhase !== "setup") {
-        document.getElementById("memberNameInput").disabled = true;
-        document.getElementById("addMemberBtn").disabled = true;
-        document.querySelectorAll(".pick-btn").forEach(b => b.disabled = true);
-    }
+    // Enable/disable inputs based on draft phase
+    const isSetup = state.draftPhase === "setup";
+    document.getElementById("memberNameInput").disabled = !isSetup;
+    document.getElementById("addMemberBtn").disabled = !isSetup;
+    document.querySelectorAll(".pick-btn").forEach(b => b.disabled = !isSetup);
 }
 
 function renderDraftOrder() {
