@@ -1,9 +1,9 @@
 /* ============================================
-   THE MASTERS POOL 2025 — Main Application
+   THE MASTERS POOL 2026 — Main Application
    ============================================ */
 
 // ──────────────────────────────────────────────
-// PLAYER DATA (2025 Masters Field — ~90 players)
+// PLAYER DATA (2026 Masters Field — ~90 players)
 // ──────────────────────────────────────────────
 const MASTERS_FIELD = [
     { name: "Scottie Scheffler", country: "USA", rank: 1 },
@@ -199,12 +199,16 @@ const HARDCODED_ODDS = {
 };
 
 // ──────────────────────────────────────────────
-// STATE
+// STATE (synced via Supabase)
 // ──────────────────────────────────────────────
-const STORAGE_KEY = "mastersPool2025";
+const SUPABASE_URL = "https://phdexjpwjweinjnciaqn.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBoZGV4anB3andlaW5qbmNpYXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5MjcxMTgsImV4cCI6MjA4NjUwMzExOH0.5Zq1e-8WvR0ixs5qC3u3928dvw-rliJ_qMuZibhmD7U";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+const STORAGE_KEY = "mastersPool2026";
 const PAR = 72; // Augusta National par
 
-let state = loadState() || {
+const DEFAULT_STATE = {
     members: [],           // [{id, name}]
     picksPerPerson: 4,
     draftOrder: [],        // member ids in randomized order
@@ -218,15 +222,70 @@ let state = loadState() || {
     replacements: {},      // {originalPlayerName: replacementPlayerName}
 };
 
-function loadState() {
+let state = { ...DEFAULT_STATE };
+let _savingToSupabase = false;
+
+// Load from Supabase first, fall back to localStorage
+async function loadStateFromSupabase() {
+    try {
+        const { data, error } = await supabase
+            .from("draft_state")
+            .select("state")
+            .eq("id", 1)
+            .single();
+        if (!error && data?.state && Object.keys(data.state).length > 0) {
+            return data.state;
+        }
+    } catch (e) { console.warn("Supabase load failed:", e); }
+    // Fall back to localStorage
     try {
         const raw = localStorage.getItem(STORAGE_KEY);
         return raw ? JSON.parse(raw) : null;
     } catch { return null; }
 }
 
-function saveState() {
+// Save to both Supabase (shared) and localStorage (offline fallback)
+async function saveState() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    if (_savingToSupabase) return;
+    _savingToSupabase = true;
+    try {
+        // Only sync draft-related state (not liveScores — those are fetched independently)
+        const shared = { ...state };
+        delete shared.liveScores; // too large + fetched independently per client
+        delete shared.oddsCache;
+        await supabase
+            .from("draft_state")
+            .update({ state: shared, updated_at: new Date().toISOString() })
+            .eq("id", 1);
+    } catch (e) { console.warn("Supabase save failed:", e); }
+    _savingToSupabase = false;
+}
+
+// Real-time subscription — when another device saves, update local state
+function subscribeToRealtimeUpdates() {
+    supabase
+        .channel("draft_state_changes")
+        .on("postgres_changes", { event: "UPDATE", schema: "public", table: "draft_state" }, (payload) => {
+            const remote = payload.new?.state;
+            if (!remote) return;
+            // Merge: keep local liveScores/oddsCache, take everything else from remote
+            const localScores = state.liveScores;
+            const localOdds = state.oddsCache;
+            Object.assign(state, remote);
+            state.liveScores = localScores;
+            state.oddsCache = localOdds;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            // Re-render current view
+            refreshUI();
+        })
+        .subscribe();
+}
+
+function refreshUI() {
+    const activeTab = document.querySelector(".tab-content.active");
+    if (activeTab?.id === "tab-draft") renderDraft();
+    else if (activeTab?.id === "tab-leaderboard") renderLeaderboard();
 }
 
 // ──────────────────────────────────────────────
@@ -764,9 +823,9 @@ async function fetchLiveScores() {
     infoEl.innerHTML = '<span class="spinner"></span> Fetching live scores...';
 
     try {
-        // Masters.com is the primary source — has all 91 players with tee times, thru, scores
-        // ESPN is the fallback if masters.com is down
-        const mastersResp = await fetch("https://www.masters.com/en_US/scores/feeds/2026/scores.json").catch(() => null);
+        // Masters.com via Supabase Edge Function proxy (avoids CORS)
+        // ESPN scoreboard is the fallback if proxy is down
+        const mastersResp = await fetch(`${SUPABASE_URL}/functions/v1/scores-proxy`).catch(() => null);
 
         const scoreData = {};
         const allRoundScores = { 1: [], 2: [], 3: [], 4: [] };
@@ -792,8 +851,8 @@ async function fetchLiveScores() {
                 // Parse round scores (each round is an object with .total)
                 for (let r = 1; r <= 4; r++) {
                     const roundData = p[`round${r}`];
-                    const roundTotal = roundData?.total;
-                    if (roundTotal && roundTotal > 0) {
+                    const roundTotal = parseInt(roundData?.total);
+                    if (!isNaN(roundTotal) && roundTotal > 0) {
                         scores[`r${r}`] = roundTotal;
                         allRoundScores[r].push(roundTotal);
                     }
@@ -1282,23 +1341,21 @@ function escapeAttr(str) {
 // ──────────────────────────────────────────────
 // INITIALIZATION
 // ──────────────────────────────────────────────
-document.addEventListener("DOMContentLoaded", () => {
-    // Load API key: priority is URL hash > injected meta tag > saved state
-    // 1. URL hash fragment (never sent to server): #key=YOUR_API_KEY
-    const hash = window.location.hash;
-    if (hash.startsWith("#key=")) {
-        state.oddsApiKey = hash.slice(5);
-        saveState();
-        history.replaceState(null, "", window.location.pathname + window.location.search);
-    }
-    // 2. Injected by GitHub Actions from repository secret
+document.addEventListener("DOMContentLoaded", async () => {
+    // Load shared state from Supabase (or localStorage fallback)
+    const saved = await loadStateFromSupabase();
+    if (saved) Object.assign(state, saved);
+
+    // Load API key from injected meta tag
     if (!state.oddsApiKey) {
         const meta = document.querySelector('meta[name="odds-api-key"]');
         if (meta && meta.content && meta.content !== "__ODDS_API_KEY__") {
             state.oddsApiKey = meta.content;
-            saveState();
         }
     }
+
+    // Subscribe to real-time updates from other devices
+    subscribeToRealtimeUpdates();
 
     // Nav
     document.querySelectorAll(".nav-btn").forEach(btn => {
@@ -1308,8 +1365,15 @@ document.addEventListener("DOMContentLoaded", () => {
     initSetup();
     initManualScores();
 
-    // Restore odds cache
-    if (state.oddsCache?.data) oddsData = state.oddsCache.data;
+    // Restore odds cache from localStorage (not shared)
+    try {
+        const localRaw = localStorage.getItem(STORAGE_KEY);
+        if (localRaw) {
+            const local = JSON.parse(localRaw);
+            if (local.oddsCache?.data) { state.oddsCache = local.oddsCache; oddsData = local.oddsCache.data; }
+            if (local.liveScores) state.liveScores = local.liveScores;
+        }
+    } catch {}
 
     // Show appropriate tab based on draft state
     if (state.draftPhase === "complete") showTab("leaderboard");
@@ -1318,6 +1382,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Auto-refresh scores every 30 seconds when draft is complete
     if (state.draftPhase === "complete") {
         fetchLiveScores();
-        setInterval(() => fetchLiveScores(), 30000);
     }
+    setInterval(() => {
+        if (state.draftPhase === "complete") fetchLiveScores();
+    }, 30000);
 });
