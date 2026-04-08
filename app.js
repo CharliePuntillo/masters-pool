@@ -1060,6 +1060,16 @@ function escapeAttr(str) {
 // INITIALIZATION
 // ──────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
+    // Load API key from URL hash fragment if present (hash is never sent to server)
+    // Usage: https://yoursite.github.io/masters-pool/#key=YOUR_API_KEY
+    const hash = window.location.hash;
+    if (hash.startsWith("#key=")) {
+        state.oddsApiKey = hash.slice(5);
+        saveState();
+        // Clear the hash from the URL bar so it's not visible if someone looks over your shoulder
+        history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
+
     // Nav
     document.querySelectorAll(".nav-btn").forEach(btn => {
         btn.addEventListener("click", () => showTab(btn.dataset.tab));
