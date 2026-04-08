@@ -36,7 +36,7 @@
 /* ---- Reset & Base ---- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-anchor: auto; }
 
 body {
     font-family: var(--font-body);
@@ -384,7 +384,7 @@ input:focus, select:focus {
 /* ---- Draft Layout ---- */
 
 /* ---- Player Pool ---- */
-.search-input { width: 180px !important; padding: 0.35rem 0.6rem !important; font-size: 0.8rem !important; }
+.search-input { width: 180px !important; padding: 0.35rem 0.6rem !important; font-size: 1rem !important; }
 
 .player-pool-header {
     display: grid;
@@ -400,8 +400,9 @@ input:focus, select:focus {
 }
 
 .player-pool {
-    max-height: 520px;
+    height: 420px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .player-row {

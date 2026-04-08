@@ -686,7 +686,11 @@ function renderPlayerPool() {
 
     // Wire up search and sort headers
     if (!searchInput._wired) {
-        searchInput.addEventListener("input", () => renderPlayerPool());
+        let _searchTimer;
+        searchInput.addEventListener("input", () => {
+            clearTimeout(_searchTimer);
+            _searchTimer = setTimeout(() => renderPlayerPool(), 150);
+        });
         document.querySelectorAll(".ph-sort").forEach(btn => {
             btn.addEventListener("click", () => {
                 playerSortCol = btn.dataset.sort;
