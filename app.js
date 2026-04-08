@@ -290,6 +290,10 @@ function subscribeToRealtimeUpdates() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
             // Re-render current view
             refreshUI();
+            // If draft just completed, fetch scores immediately
+            if (remote.draftPhase === "complete" && !state.liveScores) {
+                fetchLiveScores();
+            }
         })
         .subscribe();
 }
@@ -508,6 +512,7 @@ async function makePick(playerName) {
         await saveState();
         renderDraft();
         launchConfetti();
+        fetchLiveScores();
     } else {
         await saveState();
         renderDraft();
