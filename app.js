@@ -311,6 +311,7 @@ async function subscribeToRealtimeUpdates() {
         .on("postgres_changes", { event: "UPDATE", schema: "public", table: "draft_state" }, (payload) => {
             const remote = payload.new?.state;
             if (!remote) return;
+            const prevPhase = state.draftPhase;
             // Merge: keep local liveScores/oddsCache, take everything else from remote
             const localScores = state.liveScores;
             const localOdds = state.oddsCache;
@@ -320,8 +321,8 @@ async function subscribeToRealtimeUpdates() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
             // Re-render current view
             refreshUI();
-            // If draft just completed, switch to leaderboard and fetch scores
-            if (remote.draftPhase === "complete") {
+            // Auto-switch to leaderboard only on the transition to complete
+            if (remote.draftPhase === "complete" && prevPhase !== "complete") {
                 showTab("leaderboard");
                 fetchLiveScores();
             }
