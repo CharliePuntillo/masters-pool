@@ -474,10 +474,15 @@ function getMemberById(id) {
     return state.members.find(m => m.id === id);
 }
 
-function makePick(playerName) {
+let _pickInProgress = false;
+async function makePick(playerName) {
+    if (_pickInProgress) return;
     const totalPicks = state.members.length * state.picksPerPerson;
     if (state.currentPickIndex >= totalPicks) return;
+    // Prevent double-picks from race conditions
+    if (state.picks.some(p => p.playerName === playerName)) return;
 
+    _pickInProgress = true;
     const { round, memberId } = getSnakePick(state.currentPickIndex);
     state.picks.push({
         round,
@@ -489,13 +494,14 @@ function makePick(playerName) {
 
     if (state.currentPickIndex >= totalPicks) {
         state.draftPhase = "complete";
-        saveState();
+        await saveState();
         renderDraft();
         launchConfetti();
     } else {
-        saveState();
+        await saveState();
         renderDraft();
     }
+    _pickInProgress = false;
 }
 
 function undoLastPick() {
