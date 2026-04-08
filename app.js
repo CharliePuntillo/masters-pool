@@ -244,8 +244,9 @@ const DEFAULT_STATE = {
 let state = { ...DEFAULT_STATE };
 let _savingToSupabase = false;
 
-// Load from Supabase first, fall back to localStorage
+// Load from Supabase first, fall back to direct REST, then localStorage
 async function loadStateFromSupabase() {
+    // Try 1: Supabase JS client
     try {
         const client = await waitForSupabase();
         if (client) {
@@ -258,8 +259,22 @@ async function loadStateFromSupabase() {
                 return data.state;
             }
         }
-    } catch (e) { console.warn("Supabase load failed:", e); }
-    // Fall back to localStorage (try current key, then legacy key)
+    } catch (e) { console.warn("Supabase client load failed:", e); }
+
+    // Try 2: Direct REST fetch (bypasses any client issues)
+    try {
+        const resp = await fetch(`${SUPABASE_URL}/rest/v1/draft_state?id=eq.1&select=state`, {
+            headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}` }
+        });
+        if (resp.ok) {
+            const arr = await resp.json();
+            if (arr[0]?.state && Object.keys(arr[0].state).length > 0) {
+                return arr[0].state;
+            }
+        }
+    } catch (e) { console.warn("Direct REST load failed:", e); }
+
+    // Try 3: localStorage (try current key, then legacy key)
     try {
         const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("mastersPool2025");
         return raw ? JSON.parse(raw) : null;
@@ -1378,12 +1393,20 @@ function escapeAttr(str) {
 // INITIALIZATION
 // ──────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
-    // Load shared state from Supabase (or localStorage fallback)
-    const saved = await loadStateFromSupabase();
-    if (saved) {
-        Object.assign(state, saved);
-        // Cache to localStorage so refreshes without network still work
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    try {
+        // Load shared state from Supabase (or localStorage fallback)
+        const saved = await loadStateFromSupabase();
+        if (saved) {
+            Object.assign(state, saved);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+    } catch (e) {
+        console.warn("State load error:", e);
+        // Try localStorage as last resort
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("mastersPool2025");
+            if (raw) Object.assign(state, JSON.parse(raw));
+        } catch {}
     }
 
     // Load API key from injected meta tag
@@ -1395,15 +1418,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // Subscribe to real-time updates from other devices
-    subscribeToRealtimeUpdates();
+    try { subscribeToRealtimeUpdates(); } catch (e) { console.warn("Realtime sub error:", e); }
 
     // Nav
     document.querySelectorAll(".nav-btn").forEach(btn => {
         btn.addEventListener("click", () => showTab(btn.dataset.tab));
     });
 
-    initSetup();
-    initManualScores();
+    try { initSetup(); } catch (e) { console.warn("initSetup error:", e); }
+    try { initManualScores(); } catch (e) { console.warn("initManualScores error:", e); }
 
     // Restore odds cache from localStorage (not shared)
     try {
@@ -1415,7 +1438,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     } catch {}
 
-    // Hide loading spinner — state is ready
+    // ALWAYS hide loading spinner and show UI, no matter what
     const loadingEl = document.getElementById("appLoading");
     if (loadingEl) loadingEl.style.display = "none";
 
@@ -1424,9 +1447,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     else showTab("draft");
 
     // Auto-refresh scores every 30 seconds when draft is complete
-    if (state.draftPhase === "complete") {
-        fetchLiveScores();
-    }
+    if (state.draftPhase === "complete") fetchLiveScores();
     setInterval(() => {
         if (state.draftPhase === "complete") fetchLiveScores();
     }, 30000);
