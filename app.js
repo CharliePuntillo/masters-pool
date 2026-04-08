@@ -809,8 +809,32 @@ function renderLeaderboard() {
 
     const standings = calculatePoolStandings();
 
-    let html = "";
+    // Helper: format a round score relative to par
+    function fmtRound(score) {
+        if (score == null) return "—";
+        const diff = score - PAR;
+        return diff === 0 ? "E" : (diff > 0 ? `+${diff}` : `${diff}`);
+    }
 
+    // Summary leaderboard table
+    let html = `<table class="pool-summary-table">
+        <thead><tr>
+            <th>#</th>
+            <th>Member</th>
+            <th>Total</th>
+        </tr></thead>
+        <tbody>${standings.map((s, i) => {
+            const rank = i + 1;
+            const isLeader = rank === 1 && s.totalScore !== null;
+            return `<tr class="${isLeader ? 'summary-leader' : ''}">
+                <td class="pool-rank${isLeader ? ' first' : ''}">${s.totalScore !== null ? rank : "—"}</td>
+                <td class="pool-summary-name">${escapeHtml(s.member.name)}</td>
+                <td class="pool-summary-score${isLeader ? ' leader' : ''}">${s.toParStr}</td>
+            </tr>`;
+        }).join("")}</tbody>
+    </table>`;
+
+    // Detailed breakdown per member
     standings.forEach((s, i) => {
         const rank = i + 1;
         const isLeader = rank === 1 && s.totalScore !== null;
@@ -819,10 +843,7 @@ function renderLeaderboard() {
             <div class="pool-member-header">
                 <span class="pool-rank${isLeader ? ' first' : ''}">${s.totalScore !== null ? rank : "—"}</span>
                 <span class="pool-member-name">${escapeHtml(s.member.name)}</span>
-                <span class="pool-member-totals">
-                    <span class="pool-total">${s.totalScore ?? "—"}</span>
-                    <span class="pool-topar${isLeader ? ' leader' : ''}">${s.toParStr}</span>
-                </span>
+                <span class="pool-topar${isLeader ? ' leader' : ''}">${s.toParStr}</span>
             </div>
             <table class="pool-player-table">
                 <thead><tr>
@@ -831,8 +852,7 @@ function renderLeaderboard() {
                     <th>R2</th>
                     <th>R3</th>
                     <th>R4</th>
-                    <th>Tot</th>
-                    <th>Par</th>
+                    <th>Total</th>
                 </tr></thead>
                 <tbody>
                     ${s.players.map(p => {
@@ -841,11 +861,10 @@ function renderLeaderboard() {
                         const shortName = parts.length > 1 ? parts[0][0] + ". " + parts[parts.length - 1] : p.name;
                         return `<tr class="pool-player-row${statusClass}">
                             <td class="pp-name"><span class="pp-full">${escapeHtml(p.name)}</span><span class="pp-short">${escapeHtml(shortName)}</span>${p.status ? ` <span class="pp-status">${p.status}</span>` : ""}</td>
-                            <td class="pp-round">${p.rounds[0] ?? "—"}</td>
-                            <td class="pp-round">${p.rounds[1] ?? "—"}</td>
-                            <td class="pp-round">${p.rounds[2] ?? "—"}</td>
-                            <td class="pp-round">${p.rounds[3] ?? "—"}</td>
-                            <td class="pp-total">${p.total ?? "—"}</td>
+                            <td class="pp-round">${fmtRound(p.rounds[0])}</td>
+                            <td class="pp-round">${fmtRound(p.rounds[1])}</td>
+                            <td class="pp-round">${fmtRound(p.rounds[2])}</td>
+                            <td class="pp-round">${fmtRound(p.rounds[3])}</td>
                             <td class="pp-topar${statusClass}">${p.toParStr || "—"}</td>
                         </tr>`;
                     }).join("")}
@@ -1099,9 +1118,6 @@ document.addEventListener("DOMContentLoaded", () => {
     initSetup();
     initManualScores();
 
-    // Refresh scores button
-    document.getElementById("refreshScoresBtn").addEventListener("click", fetchLiveScores);
-
     // Restore odds cache
     if (state.oddsCache?.data) oddsData = state.oddsCache.data;
 
@@ -1109,9 +1125,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (state.draftPhase === "drafting") showTab("draft");
     else if (state.draftPhase === "complete") showTab("leaderboard");
 
-    // Auto-fetch scores on leaderboard if draft is complete
-    if (state.draftPhase === "complete" && !state.liveScores && !state.manualScores) {
-        // Wait a beat then try to fetch
-        setTimeout(() => fetchLiveScores(), 500);
+    // Auto-refresh scores every 30 seconds when draft is complete
+    if (state.draftPhase === "complete") {
+        fetchLiveScores();
+        setInterval(() => fetchLiveScores(), 30000);
     }
 });

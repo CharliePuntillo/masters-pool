@@ -505,6 +505,38 @@ input:focus, select:focus {
 .tourney-status .btn-primary { background: var(--gold); color: var(--black); }
 
 /* ---- Pool Leaderboard ---- */
+/* Pool summary leaderboard */
+.pool-summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.25rem;
+    background: var(--white);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+}
+.pool-summary-table thead th {
+    background: var(--green-dark);
+    color: var(--white);
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-align: left;
+}
+.pool-summary-table thead th:first-child { width: 40px; text-align: center; }
+.pool-summary-table thead th:last-child { text-align: right; }
+.pool-summary-table td {
+    padding: 0.55rem 1rem;
+    border-bottom: 1px solid var(--gray-100);
+    font-size: 0.88rem;
+}
+.pool-summary-table tbody tr:last-child td { border-bottom: none; }
+.pool-summary-table tbody tr:hover td { background: var(--green-pale); }
+.pool-summary-table tr.summary-leader td { background: var(--cream); }
+.pool-summary-name { font-weight: 600; }
+.pool-summary-score { text-align: right; font-weight: 700; font-family: var(--font-display); font-size: 1rem; color: var(--green-dark); }
+.pool-summary-score.leader { color: var(--gold); }
+
 /* Pool member block */
 .pool-member-block {
     background: var(--white);
@@ -538,12 +570,6 @@ input:focus, select:focus {
 
 .pool-member-name { font-weight: 700; font-size: 1rem; flex: 1; }
 
-.pool-member-totals {
-    display: flex;
-    gap: 1rem;
-    align-items: baseline;
-}
-.pool-total { font-weight: 600; font-size: 0.85rem; opacity: 0.8; }
 .pool-topar { font-weight: 700; font-family: var(--font-display); font-size: 1.15rem; }
 .pool-topar.leader { color: var(--gold); }
 
@@ -581,7 +607,6 @@ input:focus, select:focus {
 .pool-player-row.wd .pp-status { background: #fce4ec; color: var(--azalea); }
 
 .pp-round { color: var(--gray-700); font-family: var(--font-display); }
-.pp-total { font-weight: 700; font-family: var(--font-display); }
 .pp-topar { font-weight: 700; font-family: var(--font-display); color: var(--green-dark); }
 .pp-topar.mc, .pp-topar.wd { color: var(--red); }
 
@@ -731,14 +756,17 @@ input:focus, select:focus {
     .tourney-info { font-size: 0.78rem; }
     .tourney-actions { width: 100%; justify-content: center; }
 
+    /* Summary table */
+    .pool-summary-table td, .pool-summary-table thead th { padding: 0.4rem 0.6rem; }
+    .pool-summary-table td { font-size: 0.82rem; }
+    .pool-summary-score { font-size: 0.9rem; }
+
     /* Leaderboard blocks — compact for 8 members */
     .pool-member-block { margin-bottom: 0.6rem; border-radius: var(--radius-sm); }
     .pool-member-header { padding: 0.5rem 0.6rem; gap: 0.5rem; }
     .pool-rank { font-size: 0.95rem; min-width: 22px; }
     .pool-rank.first { font-size: 1.1rem; }
     .pool-member-name { font-size: 0.88rem; }
-    .pool-member-totals { gap: 0.6rem; }
-    .pool-total { font-size: 0.75rem; }
     .pool-topar { font-size: 1rem; }
 
     /* Player table — tight columns for mobile */
@@ -757,7 +785,6 @@ input:focus, select:focus {
     .pp-name { padding-left: 0.5rem !important; }
     .pp-status { margin-left: 0.15rem; font-size: 0.58rem; padding: 0.05rem 0.2rem; }
     .pp-round { font-size: 0.72rem; }
-    .pp-total { font-size: 0.72rem; }
     .pp-topar { font-size: 0.72rem; }
 
     /* Celebration */
