@@ -216,6 +216,8 @@ a { color: var(--green-dark); }
 .btn-danger:hover:not(:disabled) { background: #b71c1c; }
 
 .btn-sm { padding: 0.3rem 0.75rem; font-size: 0.78rem; }
+.btn-undo { background: rgba(255,255,255,0.9); color: var(--red); border-color: rgba(255,255,255,0.9); }
+.btn-undo:hover:not(:disabled) { background: var(--white); }
 .btn-large { width: 100%; padding: 0.85rem; margin-top: 1rem; font-size: 1.05rem; }
 
 .btn-pick {
