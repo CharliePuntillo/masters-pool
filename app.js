@@ -203,10 +203,25 @@ const HARDCODED_ODDS = {
 // ──────────────────────────────────────────────
 const SUPABASE_URL = "https://phdexjpwjweinjnciaqn.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBoZGV4anB3andlaW5qbmNpYXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5MjcxMTgsImV4cCI6MjA4NjUwMzExOH0.5Zq1e-8WvR0ixs5qC3u3928dvw-rliJ_qMuZibhmD7U";
-let sb = null; // initialized in DOMContentLoaded
+let sb = null;
 function getSupabase() {
     if (!sb && window.supabase) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
     return sb;
+}
+
+// Wait for Supabase CDN to be available (up to 5s)
+function waitForSupabase() {
+    return new Promise(resolve => {
+        if (window.supabase) return resolve(getSupabase());
+        let attempts = 0;
+        const check = setInterval(() => {
+            attempts++;
+            if (window.supabase || attempts > 50) {
+                clearInterval(check);
+                resolve(getSupabase());
+            }
+        }, 100);
+    });
 }
 
 const STORAGE_KEY = "mastersPool2026";
@@ -232,7 +247,7 @@ let _savingToSupabase = false;
 // Load from Supabase first, fall back to localStorage
 async function loadStateFromSupabase() {
     try {
-        const client = getSupabase();
+        const client = await waitForSupabase();
         if (client) {
             const { data, error } = await client
                 .from("draft_state")
@@ -244,9 +259,9 @@ async function loadStateFromSupabase() {
             }
         }
     } catch (e) { console.warn("Supabase load failed:", e); }
-    // Fall back to localStorage
+    // Fall back to localStorage (try current key, then legacy key)
     try {
-        const raw = localStorage.getItem(STORAGE_KEY);
+        const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("mastersPool2025");
         return raw ? JSON.parse(raw) : null;
     } catch { return null; }
 }
@@ -273,8 +288,8 @@ async function saveState() {
 }
 
 // Real-time subscription — when another device saves, update local state
-function subscribeToRealtimeUpdates() {
-    const client = getSupabase();
+async function subscribeToRealtimeUpdates() {
+    const client = await waitForSupabase();
     if (!client) return;
     client
         .channel("draft_state_changes")
@@ -1366,7 +1381,11 @@ function escapeAttr(str) {
 document.addEventListener("DOMContentLoaded", async () => {
     // Load shared state from Supabase (or localStorage fallback)
     const saved = await loadStateFromSupabase();
-    if (saved) Object.assign(state, saved);
+    if (saved) {
+        Object.assign(state, saved);
+        // Cache to localStorage so refreshes without network still work
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
 
     // Load API key from injected meta tag
     if (!state.oddsApiKey) {
