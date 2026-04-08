@@ -837,8 +837,10 @@ function renderLeaderboard() {
                 <tbody>
                     ${s.players.map(p => {
                         const statusClass = p.status === "MC" ? " mc" : (p.status === "WD" ? " wd" : "");
+                        const parts = p.name.split(" ");
+                        const shortName = parts.length > 1 ? parts[0][0] + ". " + parts[parts.length - 1] : p.name;
                         return `<tr class="pool-player-row${statusClass}">
-                            <td class="pp-name">${escapeHtml(p.name)}${p.status ? ` <span class="pp-status">${p.status}</span>` : ""}</td>
+                            <td class="pp-name"><span class="pp-full">${escapeHtml(p.name)}</span><span class="pp-short">${escapeHtml(shortName)}</span>${p.status ? ` <span class="pp-status">${p.status}</span>` : ""}</td>
                             <td class="pp-round">${p.rounds[0] ?? "—"}</td>
                             <td class="pp-round">${p.rounds[1] ?? "—"}</td>
                             <td class="pp-round">${p.rounds[2] ?? "—"}</td>

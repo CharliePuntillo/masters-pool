@@ -511,7 +511,7 @@ input:focus, select:focus {
     border-radius: var(--radius);
     margin-bottom: 1rem;
     border: 1px solid var(--gray-100);
-    overflow: hidden;
+    overflow-x: auto;
 }
 .pool-member-block.leader {
     border: 2px solid var(--gold);
@@ -574,7 +574,8 @@ input:focus, select:focus {
 .pool-player-table tbody tr:last-child td { border-bottom: none; }
 .pool-player-table tbody tr:hover td { background: var(--green-pale); }
 
-.pp-name { text-align: left !important; padding-left: 1rem !important; font-weight: 600; }
+.pp-name { text-align: left !important; padding-left: 1rem !important; font-weight: 600; white-space: nowrap; }
+.pp-short { display: none; }
 .pp-status { font-size: 0.68rem; font-weight: 700; padding: 0.1rem 0.35rem; border-radius: 3px; margin-left: 0.3rem; }
 .pool-player-row.mc .pp-status { background: var(--red-light); color: var(--red); }
 .pool-player-row.wd .pp-status { background: #fce4ec; color: var(--azalea); }
@@ -717,15 +718,49 @@ input:focus, select:focus {
 
 /* ---- Responsive ---- */
 @media (max-width: 600px) {
+    .container { padding: 0 0.5rem; }
+    .main { padding: 1rem 0 2rem; }
     .logo-text h1 { font-size: 1.2rem; }
     .nav-btn { font-size: 0.75rem; padding: 0.5rem 0.6rem; }
     .pick-banner { flex-direction: column; text-align: center; }
     .pick-name { font-size: 1.1rem; }
     .player-pool-header, .player-row { grid-template-columns: 32px 1fr 65px 60px; font-size: 0.78rem; }
     .search-input { width: 130px !important; }
-    .tourney-status { flex-direction: column; text-align: center; }
-    .pool-player-table { font-size: 0.75rem; }
-    .pool-player-table td, .pool-player-table thead th { padding: 0.35rem 0.3rem; }
+    .tourney-status { flex-direction: column; text-align: center; padding: 0.75rem 1rem; }
+    .tourney-badge { font-size: 1rem; }
+    .tourney-info { font-size: 0.78rem; }
+    .tourney-actions { width: 100%; justify-content: center; }
+
+    /* Leaderboard blocks — compact for 8 members */
+    .pool-member-block { margin-bottom: 0.6rem; border-radius: var(--radius-sm); }
+    .pool-member-header { padding: 0.5rem 0.6rem; gap: 0.5rem; }
+    .pool-rank { font-size: 0.95rem; min-width: 22px; }
+    .pool-rank.first { font-size: 1.1rem; }
+    .pool-member-name { font-size: 0.88rem; }
+    .pool-member-totals { gap: 0.6rem; }
+    .pool-total { font-size: 0.75rem; }
+    .pool-topar { font-size: 1rem; }
+
+    /* Player table — tight columns for mobile */
+    .pool-player-table { font-size: 0.7rem; }
+    .pool-player-table thead th {
+        padding: 0.3rem 0.2rem;
+        font-size: 0.62rem;
+        letter-spacing: 0;
+    }
+    .pool-player-table thead th:first-child { padding-left: 0.5rem; }
+    .pool-player-table td { padding: 0.35rem 0.2rem; }
+
+    /* Show abbreviated names on mobile */
+    .pp-full { display: none; }
+    .pp-short { display: inline; }
     .pp-name { padding-left: 0.5rem !important; }
-    .pool-member-header { padding: 0.6rem 0.75rem; }
+    .pp-status { margin-left: 0.15rem; font-size: 0.58rem; padding: 0.05rem 0.2rem; }
+    .pp-round { font-size: 0.72rem; }
+    .pp-total { font-size: 0.72rem; }
+    .pp-topar { font-size: 0.72rem; }
+
+    /* Celebration */
+    .celebration { padding: 1.5rem 0.75rem; }
+    .celebration h2 { font-size: 1.5rem; }
 }
