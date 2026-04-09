@@ -571,11 +571,11 @@ input:focus, select:focus {
     letter-spacing: 0.05em;
 }
 .lb-team-head { text-align: left; min-width: 70px; }
-.lb-total-head { width: 40px; min-width: 40px; max-width: 40px; }
+.lb-total-head { width: 44px; min-width: 44px; max-width: 44px; }
 
 /* Sticky left columns: Tot + Team */
 .lb-head-top th.lb-total-head { position: sticky; left: 0; z-index: 4; }
-.lb-head-top th.lb-team-head { position: sticky; left: 40px; z-index: 4; border-right: 2px solid var(--gray-300); }
+.lb-head-top th.lb-team-head { position: sticky; left: 44px; z-index: 4; border-right: 2px solid var(--gray-300); }
 
 /* Body rows */
 .lb-row { border-bottom: 1px solid var(--gray-100); }
@@ -592,15 +592,15 @@ input:focus, select:focus {
 
 .lb-team-total {
     text-align: center;
-    font-weight: 900;
-    font-family: var(--font-display);
-    font-size: 0.95rem;
+    font-weight: 800;
+    font-family: var(--font-body);
+    font-size: 1.1rem;
     color: var(--green-dark);
     background: var(--cream);
     position: sticky;
     left: 0;
     z-index: 1;
-    width: 40px; min-width: 40px; max-width: 40px;
+    width: 44px; min-width: 44px; max-width: 44px;
 }
 .lb-row.lb-leader td { background: #fffceb; }
 .lb-row.lb-leader .lb-team-total { background: var(--gold); color: var(--green-deeper); }
@@ -609,10 +609,10 @@ input:focus, select:focus {
 .lb-team {
     white-space: nowrap;
     font-weight: 700;
-    font-size: 0.78rem;
+    font-size: 0.9rem;
     background: var(--cream);
     position: sticky;
-    left: 40px;
+    left: 44px;
     z-index: 1;
     border-right: 2px solid var(--gray-300);
     vertical-align: middle;
@@ -628,17 +628,18 @@ input:focus, select:focus {
 .lb-pname {
     display: block;
     font-weight: 600;
-    font-size: 0.7rem;
+    font-size: 0.82rem;
     white-space: nowrap;
+    color: var(--gray-700);
 }
 .lb-name-short { display: none; }
 .lb-pscore {
     display: block;
-    font-weight: 700;
-    font-family: var(--font-display);
-    font-size: 0.78rem;
+    font-weight: 800;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
     color: var(--green-dark);
-    margin-top: 1px;
+    margin-top: 2px;
     white-space: nowrap;
 }
 .lb-pscore.lb-mc { color: var(--red); }
@@ -820,14 +821,14 @@ input:focus, select:focus {
 
     /* Leaderboard — scrollable on mobile */
     .lb-header-bar { padding: 0.4rem 0.6rem; }
-    .lb-title { font-size: 0.9rem; }
-    .lb-table { font-size: 0.68rem; }
-    .lb-pname { font-size: 0.64rem; }
-    .lb-pscore { font-size: 0.7rem; }
-    .lb-row td { padding: 0.2rem 0.2rem; }
-    .lb-cell { min-width: 72px; }
-    .lb-team-total { font-size: 0.85rem; padding-left: 0.1rem; padding-right: 0.1rem; }
-    .lb-team { font-size: 0.7rem; padding-left: 0.15rem; padding-right: 0.15rem; }
+    .lb-title { font-size: 0.95rem; }
+    .lb-table { font-size: 0.78rem; }
+    .lb-pname { font-size: 0.75rem; }
+    .lb-pscore { font-size: 0.92rem; }
+    .lb-row td { padding: 0.3rem 0.25rem; }
+    .lb-cell { min-width: 68px; }
+    .lb-team-total { font-size: 1rem; padding-left: 0.1rem; padding-right: 0.1rem; }
+    .lb-team { font-size: 0.78rem; padding-left: 0.2rem; padding-right: 0.2rem; }
     .lb-name-full { display: none; }
     .lb-name-short { display: inline; }
 
