@@ -1215,6 +1215,83 @@ function renderLeaderboard() {
 
     html += `</tbody></table></div>`;
 
+    // ───── BEST OF THE REST ─────
+    // Top 6 lowest-scoring undrafted players
+    const draftedNames = new Set();
+    state.picks.forEach(p => {
+        draftedNames.add(state.replacements[p.playerName] || p.playerName);
+    });
+    const undraftedScored = MASTERS_FIELD
+        .filter(p => !draftedNames.has(p.name))
+        .map(p => ({ name: p.name, ...getPlayerScore(p.name) }))
+        .filter(p => p.status !== "MC" && p.status !== "WD")
+        .sort((a, b) => {
+            if (a.toPar === null && b.toPar === null) return 0;
+            if (a.toPar === null) return 1;
+            if (b.toPar === null) return -1;
+            return a.toPar - b.toPar;
+        })
+        .slice(0, 6);
+
+    const restToPar = undraftedScored.reduce((sum, p) => sum + (p.toPar || 0), 0);
+    const restHasScores = undraftedScored.some(p => p.toPar !== null);
+    const restToParStr = !restHasScores ? "—" : (restToPar === 0 ? "E" : (restToPar > 0 ? `+${restToPar}` : `${restToPar}`));
+
+    // Build Best of the Rest header (6 columns)
+    let restRoundHeaders = "";
+    for (let r = 1; r <= 6; r++) {
+        restRoundHeaders += `<th class="lb-round-header">P${r}</th>`;
+    }
+
+    let restCells = "";
+    for (let r = 0; r < 6; r++) {
+        const p = undraftedScored[r];
+        if (p) {
+            const statusTag = p.status ? ` <span class="lb-status">${p.status}</span>` : "";
+            let scoreDisplay = p.toParStr || "—";
+            if (p.teeTime && p.toPar === null) {
+                scoreDisplay = `<span class="lb-tee">${p.teeTime}</span>`;
+            } else if (p.thru && p.thru !== "F") {
+                scoreDisplay += ` <span class="lb-thru">Thru ${p.thru}</span>`;
+            } else if (p.thru === "F") {
+                scoreDisplay += ` <span class="lb-thru">F</span>`;
+            }
+            const nameParts = p.name.split(" ");
+            const shortName = nameParts.length > 1 ? nameParts[0][0] + ". " + nameParts.slice(1).join(" ") : p.name;
+            const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : p.name;
+            const nameContent = `<span class="lb-name-full">${escapeHtml(shortName)}</span><span class="lb-name-short">${escapeHtml(lastName)}</span>${statusTag}`;
+            const nameEl = p.mastersId
+                ? `<a class="lb-pname lb-link" href="https://www.masters.com/en_US/players/player_${p.mastersId}.html?promo=minilb" target="_blank" rel="noopener">${nameContent}</a>`
+                : `<span class="lb-pname">${nameContent}</span>`;
+            restCells += `<td class="lb-cell">${nameEl}<span class="lb-pscore">${scoreDisplay}</span></td>`;
+        } else {
+            restCells += `<td class="lb-cell">—</td>`;
+        }
+    }
+
+    html += `<div class="lb-header-bar lb-rest-header">
+        <div class="lb-title">Best of the Rest</div>
+        <div class="lb-updated">Lowest 6 undrafted</div>
+    </div>
+    <div class="lb-scroll">
+    <table class="lb-table">
+        <thead>
+            <tr class="lb-head-top">
+                <th class="lb-total-head">Tot</th>
+                <th class="lb-team-head">Team</th>
+                ${restRoundHeaders}
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="lb-row">
+                <td class="lb-team-total">${restToParStr}</td>
+                <td class="lb-team">Rest</td>
+                ${restCells}
+            </tr>
+        </tbody>
+    </table>
+    </div>`;
+
     // Preserve scroll positions across re-render
     const oldScroll = container.querySelector(".lb-scroll");
     const savedScrollLeft = oldScroll?.scrollLeft || 0;

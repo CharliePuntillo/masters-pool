@@ -517,6 +517,7 @@ input:focus, select:focus {
 
 /* ---- Pool Leaderboard ---- */
 .lb-card { overflow: hidden; }
+.lb-rest-header { margin-top: 1.5rem; border-top: 1px solid var(--gray-100); }
 
 /* ---- Draft Leaderboard (wide table) ---- */
 .lb-header-bar {
