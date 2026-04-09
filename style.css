@@ -565,11 +565,11 @@ input:focus, select:focus {
     z-index: 2;
 }
 .lb-team-head { text-align: left; min-width: 70px; }
-.lb-total-head { width: 44px; }
+.lb-total-head { width: 40px; min-width: 40px; max-width: 40px; }
 
 /* Sticky left columns: Tot + Team */
 .lb-head-top th.lb-total-head { position: sticky; left: 0; z-index: 4; }
-.lb-head-top th.lb-team-head { position: sticky; left: 44px; z-index: 4; }
+.lb-head-top th.lb-team-head { position: sticky; left: 40px; z-index: 4; border-right: 2px solid var(--gray-300); }
 
 /* Body rows */
 .lb-row { border-bottom: 1px solid var(--gray-100); }
@@ -594,6 +594,7 @@ input:focus, select:focus {
     position: sticky;
     left: 0;
     z-index: 1;
+    width: 40px; min-width: 40px; max-width: 40px;
 }
 .lb-team-total.lb-leader { color: var(--gold); }
 
@@ -603,8 +604,9 @@ input:focus, select:focus {
     font-size: 0.78rem;
     background: var(--white);
     position: sticky;
-    left: 44px;
+    left: 40px;
     z-index: 1;
+    border-right: 2px solid var(--gray-300);
 }
 .lb-row.lb-leader .lb-team { background: var(--cream); }
 .lb-row:hover .lb-team,
