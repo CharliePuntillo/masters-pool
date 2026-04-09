@@ -946,7 +946,7 @@ async function fetchLiveScores() {
                     else liveToPar = parseInt(p.topar);
                 }
 
-                scoreData[name] = { ...scores, status: statusFlag, teeTime, thru, liveToPar };
+                scoreData[name] = { ...scores, status: statusFlag, teeTime, thru, liveToPar, mastersId: p.id };
             });
         }
 
@@ -1034,7 +1034,7 @@ function getPlayerScore(playerName) {
         dailyAvg = state.liveScores?.dailyAvg || {};
     }
 
-    if (!scoreSource) return { total: null, rounds: [], status: "", teeTime: "", thru: "", detail: "No scores" };
+    if (!scoreSource) return { total: null, rounds: [], status: "", teeTime: "", thru: "", mastersId: "", detail: "No scores" };
 
     const rounds = [];
     let total = 0;
@@ -1081,6 +1081,7 @@ function getPlayerScore(playerName) {
         status,
         teeTime: scoreSource.teeTime || "",
         thru: scoreSource.thru || "",
+        mastersId: scoreSource.mastersId || "",
         detail: hasAnyData
             ? `${rounds.map(r => r ?? "—").join("-")} (${toParStr})`
             : "No scores"
@@ -1195,7 +1196,11 @@ function renderLeaderboard() {
                 const nameParts = p.name.split(" ");
                 const shortName = nameParts.length > 1 ? nameParts[0][0] + ". " + nameParts.slice(1).join(" ") : p.name;
                 const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : p.name;
-                cells += `<td class="lb-cell"><span class="lb-pname"><span class="lb-name-full">${escapeHtml(shortName)}</span><span class="lb-name-short">${escapeHtml(lastName)}</span>${statusTag}</span><span class="lb-pscore${mcClass}">${scoreDisplay}</span></td>`;
+                const nameContent = `<span class="lb-name-full">${escapeHtml(shortName)}</span><span class="lb-name-short">${escapeHtml(lastName)}</span>${statusTag}`;
+                const nameEl = p.mastersId
+                    ? `<a class="lb-pname lb-link" href="https://www.masters.com/en_US/players/player_${p.mastersId}.html?promo=minilb" target="_blank" rel="noopener">${nameContent}</a>`
+                    : `<span class="lb-pname">${nameContent}</span>`;
+                cells += `<td class="lb-cell">${nameEl}<span class="lb-pscore${mcClass}">${scoreDisplay}</span></td>`;
             } else {
                 cells += `<td class="lb-cell">—</td>`;
             }

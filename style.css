@@ -631,7 +631,10 @@ input:focus, select:focus {
     font-size: 0.82rem;
     white-space: nowrap;
     color: var(--gray-700);
+    text-decoration: none;
 }
+a.lb-pname { cursor: pointer; }
+a.lb-pname:hover { color: var(--green-dark); text-decoration: underline; }
 .lb-name-short { display: none; }
 .lb-pscore {
     display: block;
