@@ -923,7 +923,25 @@ async function fetchLiveScores() {
                 if (pStatus === "C" || pStatus === "CUT") statusFlag = "MC";
                 else if (pStatus === "W" || pStatus === "WD") statusFlag = "WD";
 
-                const teeTime = p.teetime || "";
+                // Convert ET tee time to CT (1 hour behind)
+                let teeTime = "";
+                if (p.teetime) {
+                    const match = p.teetime.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+                    if (match) {
+                        let h = parseInt(match[1]);
+                        const m = match[2];
+                        const ampm = match[3].toUpperCase();
+                        // Convert to 24h, subtract 1, convert back
+                        if (ampm === "PM" && h !== 12) h += 12;
+                        if (ampm === "AM" && h === 12) h = 0;
+                        h = (h - 1 + 24) % 24;
+                        const newAmpm = h >= 12 ? "PM" : "AM";
+                        const h12 = h === 0 ? 12 : (h > 12 ? h - 12 : h);
+                        teeTime = `${h12}:${m} ${newAmpm} CT`;
+                    } else {
+                        teeTime = p.teetime;
+                    }
+                }
                 const thru = p.thru || "";
 
                 scoreData[name] = { ...scores, status: statusFlag, teeTime, thru };
