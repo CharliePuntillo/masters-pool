@@ -937,7 +937,7 @@ async function fetchLiveScores() {
                         h = (h - 1 + 24) % 24;
                         const newAmpm = h >= 12 ? "PM" : "AM";
                         const h12 = h === 0 ? 12 : (h > 12 ? h - 12 : h);
-                        teeTime = `${h12}:${m} ${newAmpm} CT`;
+                        teeTime = `${h12}:${m} ${newAmpm}`;
                     } else {
                         teeTime = p.teetime;
                     }
