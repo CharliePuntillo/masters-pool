@@ -1118,12 +1118,10 @@ function renderLeaderboard() {
     const standings = calculatePoolStandings();
     const numPicks = state.picksPerPerson;
 
-    // Build header: TOTAL | RANK | TEAM | R1 (Player/Score/Thru) ... Rn
+    // Build header: TOTAL | TEAM | R1 ... Rn
     let roundHeaders = "";
-    let subHeaders = "";
     for (let r = 1; r <= numPicks; r++) {
-        roundHeaders += `<th class="lb-round-header" colspan="2">R${r}</th>`;
-        subHeaders += `<th class="lb-sub">Player</th><th class="lb-sub lb-sub-score">Score</th>`;
+        roundHeaders += `<th class="lb-round-header">R${r}</th>`;
     }
 
     // Updated timestamp
@@ -1141,11 +1139,10 @@ function renderLeaderboard() {
     <table class="lb-table">
         <thead>
             <tr class="lb-head-top">
-                <th class="lb-total-head" rowspan="2">Tot</th>
-                <th class="lb-team-head" rowspan="2">Team</th>
+                <th class="lb-total-head">Tot</th>
+                <th class="lb-team-head">Team</th>
                 ${roundHeaders}
             </tr>
-            <tr class="lb-head-sub">${subHeaders}</tr>
         </thead>
         <tbody>`;
 
@@ -1158,19 +1155,18 @@ function renderLeaderboard() {
             const p = s.players[r];
             if (p) {
                 const statusTag = p.status ? ` <span class="lb-status">${p.status}</span>` : "";
-                // Show tee time if no score, or thru info
                 let scoreDisplay = p.toParStr || "—";
                 if (p.teeTime && p.total === null) {
                     scoreDisplay = `<span class="lb-tee">${p.teeTime}</span>`;
                 } else if (p.thru && p.thru !== "F") {
-                    scoreDisplay += `<span class="lb-thru">Thru ${p.thru}</span>`;
+                    scoreDisplay += ` <span class="lb-thru">Thru ${p.thru}</span>`;
                 } else if (p.thru === "F") {
-                    scoreDisplay += `<span class="lb-thru">F</span>`;
+                    scoreDisplay += ` <span class="lb-thru">F</span>`;
                 }
-                cells += `<td class="lb-player"><span class="lb-pname">${escapeHtml(p.name)}${statusTag}</span></td>`;
-                cells += `<td class="lb-score${p.status === 'MC' || p.status === 'WD' ? ' lb-mc' : ''}">${scoreDisplay}</td>`;
+                const mcClass = p.status === "MC" || p.status === "WD" ? " lb-mc" : "";
+                cells += `<td class="lb-cell"><span class="lb-pname">${escapeHtml(p.name)}${statusTag}</span><span class="lb-pscore${mcClass}">${scoreDisplay}</span></td>`;
             } else {
-                cells += `<td class="lb-player">—</td><td class="lb-score">—</td>`;
+                cells += `<td class="lb-cell">—</td>`;
             }
         }
 
