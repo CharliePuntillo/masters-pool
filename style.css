@@ -517,8 +517,18 @@ input:focus, select:focus {
 
 /* ---- Pool Leaderboard ---- */
 .lb-card { overflow: hidden; }
-.lb-rest-header { margin-top: 1.5rem; border-top: 1px solid var(--gray-100); padding-top: 0.4rem !important; padding-bottom: 0.4rem !important; }
-.lb-rest-title { font-size: 0.85rem !important; letter-spacing: 0.5px !important; }
+.lb-rest-separator td {
+    background: var(--green-deeper);
+    color: var(--gold);
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.78rem;
+    text-align: center;
+    padding: 0.4rem 0.5rem;
+    border-top: 2px solid var(--gold);
+}
 .lb-team-wrap { white-space: normal !important; line-height: 1.1; }
 
 /* ---- Draft Leaderboard (wide table) ---- */

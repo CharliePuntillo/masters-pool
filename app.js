@@ -1133,17 +1133,6 @@ function renderLeaderboard() {
         return;
     }
 
-    // Update status bar
-    const infoEl = document.getElementById("tourneyInfo");
-    if (state.liveScores) {
-        const updated = new Date(state.liveScores.lastUpdated);
-        infoEl.textContent = `${state.liveScores.tournament || "The Masters"} — Last updated: ${updated.toLocaleTimeString()}`;
-    } else if (state.manualScores) {
-        infoEl.textContent = "Scores entered manually";
-    } else {
-        infoEl.textContent = "No scores loaded. Click Refresh or use Manual Entry.";
-    }
-
     const standings = calculatePoolStandings();
     const numPicks = state.picksPerPerson;
 
@@ -1213,10 +1202,8 @@ function renderLeaderboard() {
         </tr>`;
     });
 
-    html += `</tbody></table></div>`;
-
     // ───── BEST OF THE REST ─────
-    // Top 6 lowest-scoring undrafted players
+    // Top numPicks lowest-scoring undrafted players (rendered as a row in the main table)
     const draftedNames = new Set();
     state.picks.forEach(p => {
         draftedNames.add(state.replacements[p.playerName] || p.playerName);
@@ -1231,20 +1218,14 @@ function renderLeaderboard() {
             if (b.toPar === null) return -1;
             return a.toPar - b.toPar;
         })
-        .slice(0, 6);
+        .slice(0, numPicks);
 
     const restToPar = undraftedScored.reduce((sum, p) => sum + (p.toPar || 0), 0);
     const restHasScores = undraftedScored.some(p => p.toPar !== null);
     const restToParStr = !restHasScores ? "—" : (restToPar === 0 ? "E" : (restToPar > 0 ? `+${restToPar}` : `${restToPar}`));
 
-    // Build Best of the Rest header (6 columns)
-    let restRoundHeaders = "";
-    for (let r = 1; r <= 6; r++) {
-        restRoundHeaders += `<th class="lb-round-header">P${r}</th>`;
-    }
-
     let restCells = "";
-    for (let r = 0; r < 6; r++) {
+    for (let r = 0; r < numPicks; r++) {
         const p = undraftedScored[r];
         if (p) {
             const statusTag = p.status ? ` <span class="lb-status">${p.status}</span>` : "";
@@ -1269,28 +1250,15 @@ function renderLeaderboard() {
         }
     }
 
-    html += `<div class="lb-header-bar lb-rest-header">
-        <div class="lb-title lb-rest-title">Best of the Rest</div>
-        <div class="lb-updated">Lowest 6 undrafted</div>
-    </div>
-    <div class="lb-scroll">
-    <table class="lb-table">
-        <thead>
-            <tr class="lb-head-top">
-                <th class="lb-total-head">Tot</th>
-                <th class="lb-team-head">Team</th>
-                ${restRoundHeaders}
-            </tr>
-        </thead>
-        <tbody>
-            <tr class="lb-row">
-                <td class="lb-team-total">${restToParStr}</td>
-                <td class="lb-team lb-team-wrap">Best of Rest</td>
-                ${restCells}
-            </tr>
-        </tbody>
-    </table>
-    </div>`;
+    // Append separator row + Best of the Rest row to the SAME table for column alignment
+    html += `<tr class="lb-rest-separator"><td colspan="${numPicks + 2}">Best of the Rest</td></tr>
+        <tr class="lb-row lb-rest-row">
+            <td class="lb-team-total">${restToParStr}</td>
+            <td class="lb-team lb-team-wrap">Best of Rest</td>
+            ${restCells}
+        </tr>`;
+
+    html += `</tbody></table></div>`;
 
     // Preserve scroll positions across re-render
     const oldScroll = container.querySelector(".lb-scroll");
