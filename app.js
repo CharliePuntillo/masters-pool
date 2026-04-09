@@ -939,7 +939,14 @@ async function fetchLiveScores() {
                 }
                 const thru = p.thru || "";
 
-                scoreData[name] = { ...scores, status: statusFlag, teeTime, thru };
+                // Live to-par from masters.com (covers both completed and in-progress rounds)
+                let liveToPar = null;
+                if (p.topar !== undefined && p.topar !== null && p.topar !== "") {
+                    if (p.topar === "E" || p.topar === 0 || p.topar === "0") liveToPar = 0;
+                    else liveToPar = parseInt(p.topar);
+                }
+
+                scoreData[name] = { ...scores, status: statusFlag, teeTime, thru, liveToPar };
             });
         }
 
@@ -1055,18 +1062,26 @@ function getPlayerScore(playerName) {
     }
 
     const completedRounds = rounds.filter(r => r !== null);
-    const totalToPar = total - (PAR * completedRounds.length);
+    let totalToPar = total - (PAR * completedRounds.length);
+
+    // Prefer live to-par from masters.com (covers in-progress rounds)
+    const hasLiveToPar = scoreSource.liveToPar !== null && scoreSource.liveToPar !== undefined;
+    if (hasLiveToPar) {
+        totalToPar = scoreSource.liveToPar;
+    }
+
     const toParStr = totalToPar === 0 ? "E" : (totalToPar > 0 ? `+${totalToPar}` : `${totalToPar}`);
+    const hasAnyData = completedRounds.length > 0 || hasLiveToPar;
 
     return {
         total: completedRounds.length > 0 ? total : null,
-        toPar: completedRounds.length > 0 ? totalToPar : null,
-        toParStr: completedRounds.length > 0 ? toParStr : "—",
+        toPar: hasAnyData ? totalToPar : null,
+        toParStr: hasAnyData ? toParStr : "—",
         rounds,
         status,
         teeTime: scoreSource.teeTime || "",
         thru: scoreSource.thru || "",
-        detail: completedRounds.length > 0
+        detail: hasAnyData
             ? `${rounds.map(r => r ?? "—").join("-")} (${toParStr})`
             : "No scores"
     };
@@ -1086,7 +1101,7 @@ function calculatePoolStandings() {
 
         const totalScore = players.reduce((sum, p) => sum + (p.total || 0), 0);
         const totalToPar = players.reduce((sum, p) => sum + (p.toPar || 0), 0);
-        const hasScores = players.some(p => p.total !== null);
+        const hasScores = players.some(p => p.toPar !== null);
         const toParStr = !hasScores ? "—" : (totalToPar === 0 ? "E" : (totalToPar > 0 ? `+${totalToPar}` : `${totalToPar}`));
 
         return {
@@ -1098,12 +1113,12 @@ function calculatePoolStandings() {
         };
     });
 
-    // Sort: lowest total first (null = no score = sort last)
+    // Sort: lowest to-par first (null = no score = sort last)
     standings.sort((a, b) => {
-        if (a.totalScore === null && b.totalScore === null) return 0;
-        if (a.totalScore === null) return 1;
-        if (b.totalScore === null) return -1;
-        return a.totalScore - b.totalScore;
+        if (a.totalToPar === null && b.totalToPar === null) return 0;
+        if (a.totalToPar === null) return 1;
+        if (b.totalToPar === null) return -1;
+        return a.totalToPar - b.totalToPar;
     });
 
     return standings;
@@ -1161,7 +1176,7 @@ function renderLeaderboard() {
 
     standings.forEach((s, i) => {
         const rank = i + 1;
-        const isLeader = rank === 1 && s.totalScore !== null;
+        const isLeader = rank === 1 && s.totalToPar !== null;
 
         let cells = "";
         for (let r = 0; r < numPicks; r++) {
@@ -1169,7 +1184,7 @@ function renderLeaderboard() {
             if (p) {
                 const statusTag = p.status ? ` <span class="lb-status">${p.status}</span>` : "";
                 let scoreDisplay = p.toParStr || "—";
-                if (p.teeTime && p.total === null) {
+                if (p.teeTime && p.toPar === null) {
                     scoreDisplay = `<span class="lb-tee">${p.teeTime}</span>`;
                 } else if (p.thru && p.thru !== "F") {
                     scoreDisplay += ` <span class="lb-thru">Thru ${p.thru}</span>`;
