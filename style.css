@@ -3,24 +3,25 @@
    ============================================ */
 
 :root {
-    --green-dark: #006747;
-    --green-mid: #00875a;
+    --green-dark: #006747;        /* Augusta green */
+    --green-deeper: #193526;      /* Deep masters green */
+    --green-mid: #107d57;
     --green-light: #1a9e6e;
-    --green-pale: #e8f5e9;
-    --gold: #d4af37;
-    --gold-light: #f0d060;
-    --gold-glow: rgba(212, 175, 55, 0.3);
-    --cream: #fdf8ed;
-    --cream-dark: #f5ecd7;
+    --green-pale: #f7f4f0;        /* Masters cream */
+    --gold: #fce300;              /* Masters signature yellow */
+    --gold-light: #ffeb3b;
+    --gold-glow: rgba(252, 227, 0, 0.25);
+    --cream: #f7f4f0;             /* Masters cream */
+    --cream-dark: #feedba;
     --white: #ffffff;
-    --black: #1a1a1a;
-    --gray-900: #222;
-    --gray-700: #555;
-    --gray-500: #888;
-    --gray-300: #ccc;
-    --gray-100: #f0f0f0;
-    --red: #d32f2f;
-    --red-light: #ffebee;
+    --black: #25282a;             /* Masters charcoal */
+    --gray-900: #25282a;
+    --gray-700: #53565a;
+    --gray-500: #6b6f73;
+    --gray-300: #b1b3b3;
+    --gray-100: #e8e8e8;
+    --red: #df2f3b;
+    --red-light: #feedba;
     --blue: #1565c0;
     --azalea: #cf6694;
     --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
@@ -56,10 +57,11 @@ a { color: var(--green-dark); }
 
 /* ---- Header ---- */
 .header {
-    background: linear-gradient(135deg, var(--green-dark) 0%, #004d35 100%);
+    background: var(--green-deeper);
     color: var(--white);
     padding: 0;
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    border-bottom: 3px solid var(--gold);
     position: sticky;
     top: 0;
     z-index: 100;
@@ -521,25 +523,27 @@ input:focus, select:focus {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: var(--cream);
+    background: var(--green-deeper);
+    color: var(--white);
     padding: 0.75rem 1.25rem;
-    border-bottom: 3px solid var(--green-dark);
+    border-bottom: 3px solid var(--gold);
     flex-wrap: wrap;
     gap: 0.5rem;
 }
 .lb-title {
     font-family: var(--font-display);
     font-weight: 900;
-    font-size: 1.1rem;
-    color: var(--green-dark);
+    font-size: 1.15rem;
+    color: var(--gold);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
 }
 .lb-updated {
     font-size: 0.7rem;
     font-weight: 600;
-    color: var(--gray-500);
+    color: rgba(255,255,255,0.7);
     text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .lb-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -553,16 +557,18 @@ input:focus, select:focus {
 
 /* Header row */
 .lb-head-top th {
-    background: var(--green-dark);
+    background: var(--green-deeper);
     color: var(--white);
-    padding: 0.3rem 0.3rem;
+    padding: 0.4rem 0.3rem;
     font-weight: 700;
     text-align: center;
     font-size: 0.72rem;
-    border-right: 1px solid rgba(255,255,255,0.15);
+    border-right: 1px solid rgba(255,255,255,0.1);
     position: sticky;
     top: 0;
     z-index: 2;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 .lb-team-head { text-align: left; min-width: 70px; }
 .lb-total-head { width: 40px; min-width: 40px; max-width: 40px; }
@@ -596,7 +602,9 @@ input:focus, select:focus {
     z-index: 1;
     width: 40px; min-width: 40px; max-width: 40px;
 }
-.lb-team-total.lb-leader { color: var(--gold); }
+.lb-row.lb-leader td { background: #fffceb; }
+.lb-row.lb-leader .lb-team-total { background: var(--gold); color: var(--green-deeper); }
+.lb-row.lb-leader .lb-team { background: #fffceb; }
 
 .lb-team {
     white-space: nowrap;
