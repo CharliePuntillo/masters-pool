@@ -816,8 +816,8 @@ input:focus, select:focus {
     .lb-pscore { font-size: 0.7rem; }
     .lb-row td { padding: 0.2rem 0.2rem; }
     .lb-cell { min-width: 72px; }
-    .lb-team-total { font-size: 0.85rem; }
-    .lb-team { font-size: 0.7rem; }
+    .lb-team-total { font-size: 0.85rem; padding-left: 0.1rem; padding-right: 0.1rem; }
+    .lb-team { font-size: 0.7rem; padding-left: 0.15rem; padding-right: 0.15rem; }
 
     /* Celebration */
     .celebration { padding: 1.5rem 0.75rem; }
