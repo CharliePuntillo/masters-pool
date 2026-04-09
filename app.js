@@ -1164,7 +1164,9 @@ function renderLeaderboard() {
                     scoreDisplay += ` <span class="lb-thru">F</span>`;
                 }
                 const mcClass = p.status === "MC" || p.status === "WD" ? " lb-mc" : "";
-                cells += `<td class="lb-cell"><span class="lb-pname">${escapeHtml(p.name)}${statusTag}</span><span class="lb-pscore${mcClass}">${scoreDisplay}</span></td>`;
+                const nameParts = p.name.split(" ");
+                const shortName = nameParts.length > 1 ? nameParts[0][0] + ". " + nameParts.slice(1).join(" ") : p.name;
+                cells += `<td class="lb-cell"><span class="lb-pname">${escapeHtml(shortName)}${statusTag}</span><span class="lb-pscore${mcClass}">${scoreDisplay}</span></td>`;
             } else {
                 cells += `<td class="lb-cell">—</td>`;
             }
