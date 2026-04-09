@@ -1160,7 +1160,7 @@ function renderLeaderboard() {
     }
 
     let html = `<div class="lb-header-bar">
-        <div class="lb-title">Leaderboard</div>
+        <div class="lb-title">Leader Board</div>
         ${updatedStr ? `<div class="lb-updated">Updated: ${updatedStr}</div>` : ""}
     </div>
     <div class="lb-scroll">
