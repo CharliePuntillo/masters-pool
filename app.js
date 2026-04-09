@@ -246,35 +246,24 @@ let _savingToSupabase = false;
 
 // Load from Supabase first, fall back to direct REST, then localStorage
 async function loadStateFromSupabase() {
-    // Try 1: Supabase JS client
+    // Try 1: Direct REST fetch with 3s timeout (faster than client init)
     try {
-        const client = await waitForSupabase();
-        if (client) {
-            const { data, error } = await client
-                .from("draft_state")
-                .select("state")
-                .eq("id", 1)
-                .single();
-            if (!error && data?.state && Object.keys(data.state).length > 0) {
-                return data.state;
-            }
-        }
-    } catch (e) { console.warn("Supabase client load failed:", e); }
-
-    // Try 2: Direct REST fetch (bypasses any client issues)
-    try {
+        const ctl = new AbortController();
+        const timer = setTimeout(() => ctl.abort(), 3000);
         const resp = await fetch(`${SUPABASE_URL}/rest/v1/draft_state?id=eq.1&select=state`, {
-            headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}` }
+            headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}` },
+            signal: ctl.signal
         });
+        clearTimeout(timer);
         if (resp.ok) {
             const arr = await resp.json();
             if (arr[0]?.state && Object.keys(arr[0].state).length > 0) {
                 return arr[0].state;
             }
         }
-    } catch (e) { console.warn("Direct REST load failed:", e); }
+    } catch (e) { console.warn("REST load failed:", e); }
 
-    // Try 3: localStorage (try current key, then legacy key)
+    // Try 2: localStorage (try current key, then legacy key)
     try {
         const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("mastersPool2025");
         return raw ? JSON.parse(raw) : null;
@@ -1492,6 +1481,12 @@ function escapeAttr(str) {
 // INITIALIZATION
 // ──────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
+    // Hard safety: hide loading spinner after 4s no matter what
+    const safetyTimer = setTimeout(() => {
+        const el = document.getElementById("appLoading");
+        if (el) el.style.display = "none";
+    }, 4000);
+
     try {
         // Load shared state from Supabase (or localStorage fallback)
         const saved = await loadStateFromSupabase();
@@ -1507,6 +1502,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (raw) Object.assign(state, JSON.parse(raw));
         } catch {}
     }
+    clearTimeout(safetyTimer);
 
     // Load API key from injected meta tag
     if (!state.oddsApiKey) {
