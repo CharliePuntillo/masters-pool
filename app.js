@@ -1150,7 +1150,7 @@ function renderLeaderboard() {
     }
 
     let html = `<div class="lb-header-bar">
-        <div class="lb-title">Draft Leaderboard</div>
+        <div class="lb-title">Leaderboard</div>
         ${updatedStr ? `<div class="lb-updated">Updated: ${updatedStr}</div>` : ""}
     </div>
     <div class="lb-scroll">
@@ -1184,7 +1184,8 @@ function renderLeaderboard() {
                 const mcClass = p.status === "MC" || p.status === "WD" ? " lb-mc" : "";
                 const nameParts = p.name.split(" ");
                 const shortName = nameParts.length > 1 ? nameParts[0][0] + ". " + nameParts.slice(1).join(" ") : p.name;
-                cells += `<td class="lb-cell"><span class="lb-pname">${escapeHtml(shortName)}${statusTag}</span><span class="lb-pscore${mcClass}">${scoreDisplay}</span></td>`;
+                const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : p.name;
+                cells += `<td class="lb-cell"><span class="lb-pname"><span class="lb-name-full">${escapeHtml(shortName)}</span><span class="lb-name-short">${escapeHtml(lastName)}</span>${statusTag}</span><span class="lb-pscore${mcClass}">${scoreDisplay}</span></td>`;
             } else {
                 cells += `<td class="lb-cell">—</td>`;
             }

@@ -607,6 +607,7 @@ input:focus, select:focus {
     left: 40px;
     z-index: 1;
     border-right: 2px solid var(--gray-300);
+    vertical-align: middle;
 }
 .lb-row:hover .lb-team,
 .lb-row:hover .lb-team-total { background: var(--green-pale); }
@@ -622,6 +623,7 @@ input:focus, select:focus {
     font-size: 0.7rem;
     white-space: nowrap;
 }
+.lb-name-short { display: none; }
 .lb-pscore {
     display: block;
     font-weight: 700;
@@ -818,6 +820,8 @@ input:focus, select:focus {
     .lb-cell { min-width: 72px; }
     .lb-team-total { font-size: 0.85rem; padding-left: 0.1rem; padding-right: 0.1rem; }
     .lb-team { font-size: 0.7rem; padding-left: 0.15rem; padding-right: 0.15rem; }
+    .lb-name-full { display: none; }
+    .lb-name-short { display: inline; }
 
     /* Celebration */
     .celebration { padding: 1.5rem 0.75rem; }
