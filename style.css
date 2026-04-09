@@ -691,6 +691,12 @@ a.lb-pname:hover { color: var(--green-dark); text-decoration: underline; }
     background: linear-gradient(180deg, rgba(252, 227, 0, 0.07) 0%, rgba(252, 227, 0, 0.12) 100%);
     box-shadow: inset 2px 0 0 var(--gold);
 }
+/* Leader row already has a gold-cream background — drop the tint there
+   so it doesn't double up. The pulsing dot still marks live players. */
+.lb-row.lb-leader .lb-cell.lb-live {
+    background: #fffceb;
+    box-shadow: none;
+}
 .lb-cell.lb-live .lb-thru {
     color: var(--green-dark);
     font-weight: 600;
