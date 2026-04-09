@@ -1165,6 +1165,7 @@ function renderLeaderboard() {
             if (p) {
                 const statusTag = p.status ? ` <span class="lb-status">${p.status}</span>` : "";
                 let scoreDisplay = p.toParStr || "—";
+                const isLive = p.thru && p.thru !== "F" && p.status !== "MC" && p.status !== "WD";
                 if (p.teeTime && p.toPar === null) {
                     scoreDisplay = `<span class="lb-tee">${p.teeTime}</span>`;
                 } else if (p.thru && p.thru !== "F") {
@@ -1173,6 +1174,7 @@ function renderLeaderboard() {
                     scoreDisplay += ` <span class="lb-thru">F</span>`;
                 }
                 const mcClass = p.status === "MC" || p.status === "WD" ? " lb-mc" : "";
+                const liveClass = isLive ? " lb-live" : "";
                 const nameParts = p.name.split(" ");
                 const shortName = nameParts.length > 1 ? nameParts[0][0] + ". " + nameParts.slice(1).join(" ") : p.name;
                 const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : p.name;
@@ -1180,7 +1182,7 @@ function renderLeaderboard() {
                 const nameEl = p.mastersId
                     ? `<a class="lb-pname lb-link" href="https://www.masters.com/en_US/players/player_${p.mastersId}.html?promo=minilb" target="_blank" rel="noopener">${nameContent}</a>`
                     : `<span class="lb-pname">${nameContent}</span>`;
-                cells += `<td class="lb-cell">${nameEl}<span class="lb-pscore${mcClass}">${scoreDisplay}</span></td>`;
+                cells += `<td class="lb-cell${liveClass}">${nameEl}<span class="lb-pscore${mcClass}">${scoreDisplay}</span></td>`;
             } else {
                 cells += `<td class="lb-cell">—</td>`;
             }
@@ -1221,6 +1223,7 @@ function renderLeaderboard() {
         if (p) {
             const statusTag = p.status ? ` <span class="lb-status">${p.status}</span>` : "";
             let scoreDisplay = p.toParStr || "—";
+            const isLive = p.thru && p.thru !== "F" && p.status !== "MC" && p.status !== "WD";
             if (p.teeTime && p.toPar === null) {
                 scoreDisplay = `<span class="lb-tee">${p.teeTime}</span>`;
             } else if (p.thru && p.thru !== "F") {
@@ -1228,6 +1231,7 @@ function renderLeaderboard() {
             } else if (p.thru === "F") {
                 scoreDisplay += ` <span class="lb-thru">F</span>`;
             }
+            const liveClass = isLive ? " lb-live" : "";
             const nameParts = p.name.split(" ");
             const shortName = nameParts.length > 1 ? nameParts[0][0] + ". " + nameParts.slice(1).join(" ") : p.name;
             const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : p.name;
@@ -1235,7 +1239,7 @@ function renderLeaderboard() {
             const nameEl = p.mastersId
                 ? `<a class="lb-pname lb-link" href="https://www.masters.com/en_US/players/player_${p.mastersId}.html?promo=minilb" target="_blank" rel="noopener">${nameContent}</a>`
                 : `<span class="lb-pname">${nameContent}</span>`;
-            restCells += `<td class="lb-cell">${nameEl}<span class="lb-pscore">${scoreDisplay}</span></td>`;
+            restCells += `<td class="lb-cell${liveClass}">${nameEl}<span class="lb-pscore">${scoreDisplay}</span></td>`;
         } else {
             restCells += `<td class="lb-cell">—</td>`;
         }
