@@ -1209,7 +1209,18 @@ function renderLeaderboard() {
     });
 
     html += `</tbody></table></div>`;
+
+    // Preserve scroll positions across re-render
+    const oldScroll = container.querySelector(".lb-scroll");
+    const savedScrollLeft = oldScroll?.scrollLeft || 0;
+    const savedScrollTop = window.scrollY;
+
     container.innerHTML = html;
+
+    // Restore scroll positions
+    const newScroll = container.querySelector(".lb-scroll");
+    if (newScroll && savedScrollLeft) newScroll.scrollLeft = savedScrollLeft;
+    if (savedScrollTop) window.scrollTo({ top: savedScrollTop, behavior: "instant" });
 
     // Check for WD before R1 replacements
     checkReplacements();
