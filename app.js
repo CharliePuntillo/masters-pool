@@ -878,7 +878,7 @@ function getOddsForPlayer(playerName) {
 // ──────────────────────────────────────────────
 async function fetchLiveScores() {
     const infoEl = document.getElementById("tourneyInfo");
-    infoEl.innerHTML = '<span class="spinner"></span> Fetching live scores...';
+    if (infoEl) infoEl.innerHTML = '<span class="spinner"></span> Fetching live scores...';
 
     try {
         // Masters.com via Supabase Edge Function proxy (avoids CORS)
@@ -980,11 +980,13 @@ async function fetchLiveScores() {
         }
 
         // Status text
-        let statusText = tournamentName;
-        if (tournamentStatus === "in") statusText += ` — Round ${currentRound} In Progress`;
-        else if (tournamentStatus === "post") statusText += " — Final";
-        else if (currentRound > 0) statusText += ` — Round ${currentRound} Complete`;
-        infoEl.textContent = statusText;
+        if (infoEl) {
+            let statusText = tournamentName;
+            if (tournamentStatus === "in") statusText += ` — Round ${currentRound} In Progress`;
+            else if (tournamentStatus === "post") statusText += " — Final";
+            else if (currentRound > 0) statusText += ` — Round ${currentRound} Complete`;
+            infoEl.textContent = statusText;
+        }
 
         // Calculate daily averages
         const dailyAvg = {};
@@ -999,7 +1001,7 @@ async function fetchLiveScores() {
         renderLeaderboard();
     } catch (err) {
         console.warn("Score fetch error:", err);
-        infoEl.textContent = "Could not fetch live scores. Use Manual Entry instead.";
+        if (infoEl) infoEl.textContent = "Could not fetch live scores.";
     }
 }
 
