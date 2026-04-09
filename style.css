@@ -602,13 +602,12 @@ input:focus, select:focus {
     white-space: nowrap;
     font-weight: 700;
     font-size: 0.78rem;
-    background: var(--white);
+    background: var(--cream);
     position: sticky;
     left: 40px;
     z-index: 1;
     border-right: 2px solid var(--gray-300);
 }
-.lb-row.lb-leader .lb-team { background: var(--cream); }
 .lb-row:hover .lb-team,
 .lb-row:hover .lb-team-total { background: var(--green-pale); }
 
