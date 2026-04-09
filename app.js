@@ -1493,9 +1493,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (state.draftPhase === "complete") showTab("leaderboard");
     else showTab("draft");
 
-    // Auto-refresh scores every 30 seconds when draft is complete
+    // Auto-refresh scores every 10 seconds when draft is complete
     if (state.draftPhase === "complete") fetchLiveScores();
     setInterval(() => {
-        if (state.draftPhase === "complete") fetchLiveScores();
-    }, 30000);
+        if (state.draftPhase === "complete" && !document.hidden) fetchLiveScores();
+    }, 10000);
+
+    // Refresh immediately when tab becomes visible (e.g. switching back from another app)
+    document.addEventListener("visibilitychange", () => {
+        if (!document.hidden && state.draftPhase === "complete") {
+            fetchLiveScores();
+        }
+    });
 });

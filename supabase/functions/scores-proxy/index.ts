@@ -22,7 +22,7 @@ serve(async (req) => {
       headers: {
         ...CORS_HEADERS,
         "Content-Type": "application/json",
-        "Cache-Control": "public, max-age=15",
+        "Cache-Control": "public, max-age=10",
       },
     });
   } catch (e) {
