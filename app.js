@@ -1270,7 +1270,7 @@ function renderLeaderboard() {
     }
 
     html += `<div class="lb-header-bar lb-rest-header">
-        <div class="lb-title">Best of the Rest</div>
+        <div class="lb-title lb-rest-title">Best of the Rest</div>
         <div class="lb-updated">Lowest 6 undrafted</div>
     </div>
     <div class="lb-scroll">
@@ -1285,7 +1285,7 @@ function renderLeaderboard() {
         <tbody>
             <tr class="lb-row">
                 <td class="lb-team-total">${restToParStr}</td>
-                <td class="lb-team">Rest</td>
+                <td class="lb-team lb-team-wrap">Best of Rest</td>
                 ${restCells}
             </tr>
         </tbody>
