@@ -923,24 +923,19 @@ async function fetchLiveScores() {
                 if (pStatus === "C" || pStatus === "CUT") statusFlag = "MC";
                 else if (pStatus === "W" || pStatus === "WD") statusFlag = "WD";
 
-                // Convert ET tee time to CT (1 hour behind)
+                // Convert epoch to Central time (more reliable than string parsing)
                 let teeTime = "";
-                if (p.teetime) {
-                    const match = p.teetime.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
-                    if (match) {
-                        let h = parseInt(match[1]);
-                        const m = match[2];
-                        const ampm = match[3].toUpperCase();
-                        // Convert to 24h, subtract 1, convert back
-                        if (ampm === "PM" && h !== 12) h += 12;
-                        if (ampm === "AM" && h === 12) h = 0;
-                        h = (h - 1 + 24) % 24;
-                        const newAmpm = h >= 12 ? "PM" : "AM";
-                        const h12 = h === 0 ? 12 : (h > 12 ? h - 12 : h);
-                        teeTime = `${h12}:${m} ${newAmpm}`;
-                    } else {
-                        teeTime = p.teetime;
+                if (p.epoch) {
+                    const d = new Date(parseInt(p.epoch) * 1000);
+                    if (!isNaN(d)) {
+                        teeTime = d.toLocaleTimeString("en-US", {
+                            timeZone: "America/Chicago",
+                            hour: "numeric",
+                            minute: "2-digit",
+                        });
                     }
+                } else if (p.teetime) {
+                    teeTime = p.teetime;
                 }
                 const thru = p.thru || "";
 
