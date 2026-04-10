@@ -656,6 +656,8 @@ a.lb-pname:hover { color: var(--green-dark); text-decoration: underline; }
     white-space: nowrap;
 }
 .lb-pscore.lb-mc { color: var(--red); }
+.lb-pscore.lb-under { color: var(--red); }
+.lb-team-total.lb-under { color: var(--red); }
 
 .lb-status {
     font-size: 0.55rem;

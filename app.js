@@ -1174,6 +1174,7 @@ function renderLeaderboard() {
                     scoreDisplay += ` <span class="lb-thru">F</span>`;
                 }
                 const mcClass = p.status === "MC" || p.status === "WD" ? " lb-mc" : "";
+                const underClass = p.toPar !== null && p.toPar < 0 ? " lb-under" : "";
                 const liveClass = isLive ? " lb-live" : "";
                 const nameParts = p.name.split(" ");
                 const shortName = nameParts.length > 1 ? nameParts[0][0] + ". " + nameParts.slice(1).join(" ") : p.name;
@@ -1182,14 +1183,15 @@ function renderLeaderboard() {
                 const nameEl = p.mastersId
                     ? `<a class="lb-pname lb-link" href="https://www.masters.com/en_US/players/player_${p.mastersId}.html?promo=minilb" target="_blank" rel="noopener">${nameContent}</a>`
                     : `<span class="lb-pname">${nameContent}</span>`;
-                cells += `<td class="lb-cell${liveClass}">${nameEl}<span class="lb-pscore${mcClass}">${scoreDisplay}</span></td>`;
+                cells += `<td class="lb-cell${liveClass}">${nameEl}<span class="lb-pscore${mcClass}${underClass}">${scoreDisplay}</span></td>`;
             } else {
                 cells += `<td class="lb-cell">—</td>`;
             }
         }
 
+        const teamUnder = s.totalToPar !== null && s.totalToPar < 0 ? ' lb-under' : '';
         html += `<tr class="lb-row${isLeader ? ' lb-leader' : ''}">
-            <td class="lb-team-total${isLeader ? ' lb-leader' : ''}">${s.toParStr}</td>
+            <td class="lb-team-total${isLeader ? ' lb-leader' : ''}${teamUnder}">${s.toParStr}</td>
             <td class="lb-team">${escapeHtml(s.member.name)}</td>
             ${cells}
         </tr>`;
@@ -1239,7 +1241,8 @@ function renderLeaderboard() {
             const nameEl = p.mastersId
                 ? `<a class="lb-pname lb-link" href="https://www.masters.com/en_US/players/player_${p.mastersId}.html?promo=minilb" target="_blank" rel="noopener">${nameContent}</a>`
                 : `<span class="lb-pname">${nameContent}</span>`;
-            restCells += `<td class="lb-cell${liveClass}">${nameEl}<span class="lb-pscore">${scoreDisplay}</span></td>`;
+            const restUnderClass = p.toPar !== null && p.toPar < 0 ? " lb-under" : "";
+            restCells += `<td class="lb-cell${liveClass}">${nameEl}<span class="lb-pscore${restUnderClass}">${scoreDisplay}</span></td>`;
         } else {
             restCells += `<td class="lb-cell">—</td>`;
         }
@@ -1248,7 +1251,7 @@ function renderLeaderboard() {
     // Append separator row + Best of the Rest row to the SAME table for column alignment
     html += `<tr class="lb-rest-separator"><td colspan="${numPicks + 2}">Best of the Rest</td></tr>
         <tr class="lb-row lb-rest-row">
-            <td class="lb-team-total">${restToParStr}</td>
+            <td class="lb-team-total${restHasScores && restToPar < 0 ? ' lb-under' : ''}">${restToParStr}</td>
             <td class="lb-team lb-team-wrap">Best of Rest</td>
             ${restCells}
         </tr>`;
