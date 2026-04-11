@@ -655,9 +655,17 @@ a.lb-pname:hover { color: var(--green-dark); text-decoration: underline; }
     margin-top: 2px;
     white-space: nowrap;
 }
-.lb-pscore.lb-mc { color: var(--red); }
+.lb-pscore.lb-mc { color: var(--gray-500); }
 .lb-pscore.lb-under { color: var(--red); }
 .lb-team-total.lb-under { color: var(--red); }
+
+/* Grey out players who missed the cut */
+.lb-cell.lb-cell-mc {
+    opacity: 0.4;
+}
+.lb-cell.lb-cell-mc .lb-pname { color: var(--gray-500); }
+.lb-cell.lb-cell-mc .lb-pscore { color: var(--gray-500); }
+.lb-cell.lb-cell-mc .lb-status { background: var(--gray-100); color: var(--gray-500); }
 
 .lb-status {
     font-size: 0.55rem;

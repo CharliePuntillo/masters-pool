@@ -1174,6 +1174,7 @@ function renderLeaderboard() {
                     scoreDisplay += ` <span class="lb-thru">F</span>`;
                 }
                 const mcClass = p.status === "MC" || p.status === "WD" ? " lb-mc" : "";
+                const cellMcClass = p.status === "MC" || p.status === "WD" ? " lb-cell-mc" : "";
                 const underClass = p.toPar !== null && p.toPar < 0 ? " lb-under" : "";
                 const liveClass = isLive ? " lb-live" : "";
                 const nameParts = p.name.split(" ");
@@ -1183,7 +1184,7 @@ function renderLeaderboard() {
                 const nameEl = p.mastersId
                     ? `<a class="lb-pname lb-link" href="https://www.masters.com/en_US/players/player_${p.mastersId}.html?promo=minilb" target="_blank" rel="noopener">${nameContent}</a>`
                     : `<span class="lb-pname">${nameContent}</span>`;
-                cells += `<td class="lb-cell${liveClass}">${nameEl}<span class="lb-pscore${mcClass}${underClass}">${scoreDisplay}</span></td>`;
+                cells += `<td class="lb-cell${liveClass}${cellMcClass}">${nameEl}<span class="lb-pscore${mcClass}${underClass}">${scoreDisplay}</span></td>`;
             } else {
                 cells += `<td class="lb-cell">—</td>`;
             }
